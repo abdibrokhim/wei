@@ -40,17 +40,17 @@ export default function ChatHistory({ onSelectConversation }: ChatHistoryProps) 
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 px-4 overflow-y-auto" ref={scrollAreaRef}>
+      <div className="flex-1 px-0 overflow-y-auto" ref={scrollAreaRef}>
         {isLoading ? (
           <div className="flex justify-center py-8">
             <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full"></div>
           </div>
         ) : conversationHistory.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
+          <div className="text-center py-4 text-muted-foreground">
             <p>No conversation history found</p>
           </div>
         ) : (
-          <div className="space-y-2 my-4 h-[50vh] overflow-y-auto">
+          <div className="space-y-2 my-4 h-[60vh] overflow-y-auto">
             {conversationHistory.map((conversation) => (
               <div
                 key={conversation.id}

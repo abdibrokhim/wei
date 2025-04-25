@@ -25,7 +25,7 @@ const VoiceButton: React.FC<VoiceButtonProps> = ({
   };
 
   return (
-    <div className="fixed bottom-22 md:bottom-4 right-4 flex flex-col items-end gap-2 z-50">
+    <div className="fixed bottom-18 md:bottom-4 right-4 flex flex-col items-end gap-2 z-50">
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -33,9 +33,9 @@ const VoiceButton: React.FC<VoiceButtonProps> = ({
               onClick={handleActivateVoice}
               variant="default"
               size="icon"
-              className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600"
+              className="rounded-full w-10 h-10 shadow-lg bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600"
             >
-              <Mic className="h-6 w-6" />
+              <Mic className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>

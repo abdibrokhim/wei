@@ -29,7 +29,6 @@ export default function ChatPage() {
   return (
     <>
       <div className="container mx-auto p-2 space-y-6 pb-20">
-        <h1 className="text-2xl font-bold">Chat with Wei</h1>
         <ChatInterface />
       </div>
       <BottomNavigation />

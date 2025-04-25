@@ -87,8 +87,8 @@ export default function ChatInterface({ fullHeight }: ChatInterfaceProps) {
   };
 
   return (
-    <Card className={`flex flex-col ${useFullHeight ? 'h-[85vh]' : 'h-[70vh]'}`}>
-      <CardHeader className="pb-2 pt-4">
+    <Card className={`flex gap-4 bg-transparent border-none shadow-none flex-col py-2 ${useFullHeight ? 'h-[85vh]' : 'h-[70vh]'}`}>
+      <CardHeader className="pb-0 pt-0 px-0">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <Avatar className="h-8 w-8 bg-gradient-to-br from-pink-500 to-rose-500">
@@ -113,9 +113,6 @@ export default function ChatInterface({ fullHeight }: ChatInterfaceProps) {
                 <div className="mx-auto w-full max-w-sm">
                   <DrawerHeader className="text-center">
                     <DrawerTitle>Conversation History</DrawerTitle>
-                    <DrawerDescription>
-                      View your past conversations with Wei
-                    </DrawerDescription>
                   </DrawerHeader>
                   
                   <ChatHistory onSelectConversation={handleLoadConversation} />
@@ -131,7 +128,7 @@ export default function ChatInterface({ fullHeight }: ChatInterfaceProps) {
         </div>
       </CardHeader>
       
-      <ScrollArea className="flex-1 px-4 overflow-y-auto" ref={scrollAreaRef}>
+      <ScrollArea className="flex-1 px-0 overflow-y-auto" ref={scrollAreaRef}>
         <div className="space-y-4 py-4">
           {messages.map((message) => (
             <ChatMessage 
@@ -152,7 +149,7 @@ export default function ChatInterface({ fullHeight }: ChatInterfaceProps) {
         </div>
       </ScrollArea>
       
-      <CardFooter className="pt-2">
+      <CardFooter className="pt-0 px-0">
         <div className="flex w-full gap-2">
           <Input
             placeholder="Type your message..."

@@ -55,7 +55,7 @@ export default function BottomNavigation() {
                     : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                <item.icon className="h-6 w-6" />
+                <item.icon className="h-5 w-5" />
                 <span className="text-xs mt-1">{item.label}</span>
               </Link>
             );

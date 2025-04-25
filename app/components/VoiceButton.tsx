@@ -1,0 +1,50 @@
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Mic } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+interface VoiceButtonProps {
+  isListening: boolean;
+  isConnected: boolean;
+  onStart: () => void;
+  onStop: () => void;
+  onClose: () => void;
+}
+
+const VoiceButton: React.FC<VoiceButtonProps> = ({
+  onClose,
+}) => {
+  // This button now only triggers the voice mode rather than directly handling voice interaction
+  const handleActivateVoice = () => {
+    onClose(); // Use the onClose prop to toggle voice mode on
+  };
+
+  return (
+    <div className="fixed bottom-22 md:bottom-4 right-4 flex flex-col items-end gap-2 z-50">
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              onClick={handleActivateVoice}
+              variant="default"
+              size="icon"
+              className="rounded-full w-12 h-12 shadow-lg bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600"
+            >
+              <Mic className="h-6 w-6" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Click to start voice assistant</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </div>
+  );
+};
+
+export default VoiceButton; 

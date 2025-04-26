@@ -8,21 +8,14 @@ import {
   CardHeader, 
   CardTitle 
 } from "@/components/ui/card";
-import { Leaf } from "@phosphor-icons/react/dist/ssr";
+import { Calendar, PencilLine } from "@phosphor-icons/react/dist/ssr";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useDatabase } from "@/app/contexts/DatabaseContext";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { 
-  Award, 
-  Flame, 
-  Calendar, 
-  BarChart, 
   Edit,
-  Sparkles,
 } from "lucide-react";
 import { WeiDB } from "@/app/types/database";
 import EditProfileDrawer from "./EditProfileDrawer";
@@ -222,7 +215,7 @@ export default function ProfileDashboard() {
                 className="absolute bottom-0 right-0 size-6 rounded-full opacity-90"
                 onClick={handleEditProfile}
               >
-                <Edit className="size-3" />
+                <PencilLine className="size-3" />
               </Button>
             </div>
             
@@ -242,17 +235,17 @@ export default function ProfileDashboard() {
           
           {/* Stats Row */}
           <div className="grid grid-cols-3 gap-2 mt-4">
-            <div className="relative flex flex-col items-center text-center p-2 rounded-md">
+            <div className="relative flex flex-col items-center text-center p-2 rounded-md border border-border">
               <span className="text-lg font-semibold">{streak}</span>
               <span className="text-xs text-muted-foreground">Day Streak</span>
             </div>
             
-            <div className="relative flex flex-col items-center text-center p-2 rounded-md">
+            <div className="relative flex flex-col items-center text-center p-2 rounded-md border border-border">
               <span className="text-lg font-semibold">{completionRate}</span>
               <span className="text-xs text-muted-foreground">Completion</span>
             </div>
             
-            <div className="relative flex flex-col items-center text-center p-2 rounded-md">
+            <div className="relative flex flex-col items-center text-center p-2 rounded-md border border-border">
               <span className="text-lg font-semibold">{userPoints}</span>
               <span className="text-xs text-muted-foreground">Points</span>
             </div>
@@ -268,14 +261,14 @@ export default function ProfileDashboard() {
         </TabsList>
         
         <TabsContent value="overview" className="mt-2 space-y-4">
-          <Card className="">
-            <CardHeader className="pb-2">
+          <Card className="py-4 gap-4">
+            <CardHeader className="py-0 px-4">
               <CardTitle className="text-base flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
+                <Calendar className="size-4" />
                 Recent Activity
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-4">
               <div className="space-y-3">
                 {recentActivities.length === 0 ? (
                   <p className="text-center text-muted-foreground text-sm">No recent activity found.</p>

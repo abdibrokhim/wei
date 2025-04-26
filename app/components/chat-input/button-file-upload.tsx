@@ -51,9 +51,9 @@ export function ButtonFileUpload({
         <TooltipTrigger asChild>
           <FileUploadTrigger asChild>
             <Button
-              size="sm"
-              variant="outline"
-              className={`border-border dark:bg-transparent size-8 rounded-full border bg-transparent dark:hover:bg-muted ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+              size="icon"
+              variant="ghost"
+              className={`border-border dark:bg-transparent size-8 rounded-lg border bg-transparent dark:hover:bg-muted ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
               type="button"
               aria-label="Add files"
               disabled={disabled}

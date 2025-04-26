@@ -2,18 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, List, Gift, MessageSquare, User } from "lucide-react";
+import { House, ListChecks, Gift, ChatCenteredText, User } from "@phosphor-icons/react/dist/ssr";
 import { cn } from "@/lib/utils";
 
 const items = [
   {
     label: "Home",
-    icon: Home,
+    icon: House,
     href: "/dashboard",
   },
   {
     label: "Habits",
-    icon: List,
+    icon: ListChecks,
     href: "/habits",
   },
   {
@@ -23,7 +23,7 @@ const items = [
   },
   {
     label: "Chat",
-    icon: MessageSquare,
+    icon: ChatCenteredText,
     href: "/chat",
   },
   {

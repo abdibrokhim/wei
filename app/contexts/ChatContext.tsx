@@ -38,7 +38,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const welcomeMessage: Message = {
       id: `msg_${Date.now()}`,
       sender: 'wei',
-      content: "Hi there! I'm Wei, your personal habit assistant. How can I help you today?",
+      content: "Hi there! \nI'm **Wei**, your personal habit assistant. _How can I help you today?_",
       timestamp: new Date()
     };
     setMessages([welcomeMessage]);

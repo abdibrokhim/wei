@@ -1,5 +1,6 @@
 "use client";
 
+import { Markdown } from "@/components/prompt-kit/markdown";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
@@ -30,13 +31,15 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       )}
       
       <div className={cn(
-        "px-4 py-2 rounded-lg max-w-[80%]",
-        isWei 
+          "px-4 py-2 rounded-xl max-w-[80%]",
+          isWei 
           ? "bg-muted text-foreground" 
           : "bg-primary text-primary-foreground"
       )}>
-        <p className="text-sm break-words">{message.content}</p>
-        <span className="text-[10px] opacity-70 mt-1 block text-right">
+        <div className="text-sm break-words">
+          <Markdown>{message.content}</Markdown>
+        </div>
+        <span className="text-[10px] opacity-70 mt-1 block text-left">
           {new Date(message.timestamp).toLocaleTimeString([], { 
             hour: '2-digit', 
             minute: '2-digit' 

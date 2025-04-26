@@ -282,7 +282,7 @@ export function ChatInput({
     <>
       <div className="w-full relative order-2 px-0 sm:px-0 pb-0 md:order-1">
         <PromptInput
-          className={`border-input bg-card/80 relative z-10 overflow-hidden border p-0 pb-2 shadow-xs backdrop-blur-xl`}
+          className={`rounded-xl border-input bg-card/80 relative z-10 overflow-hidden border p-0 pb-2 shadow-xs backdrop-blur-xl`}
           maxHeight={200}
           value={value}
           onValueChange={handleInputChange}
@@ -291,11 +291,11 @@ export function ChatInput({
           <PromptInputTextarea
             placeholder={connected ? (files.length > 0 ? "Image selected. Click send to share it." : "Type a message...") : "Connect to start chatting..."}
             onKeyDown={handleKeyDown}
-            className="mt-2 ml-2 min-h-[44px] max-h-[150px] text-base leading-[1.3] sm:text-base md:text-base"
+            className="mt-2 ml-2 min-h-[44px] max-h-[150px] text-sm leading-[1.3] sm:text-sm md:text-sm placeholder:text-sm"
             disabled={isSubmitting || files.length > 0 || pendingAttachment !== null}
             ref={textareaRef}
           />
-          <PromptInputActions className="mt-2 w-full justify-between px-2">
+          <PromptInputActions className="mt-1 w-full justify-between px-2">
             <div className="flex gap-2">
               {/* File Upload */}
               <div>
@@ -350,8 +350,8 @@ export function ChatInput({
               >
                 <Button
                   variant="default"
-                  size="sm"
-                  className={`size-8 rounded-full transition-all duration-300 ease-out ${isSubmitting && "cursor-wait"} ${(value.length > 0 || files.length > 0) ? "cursor-pointer" : "cursor-not-allowed"}`}
+                  size="icon"
+                  className={`size-8 rounded-lg transition-all duration-300 ease-out ${isSubmitting && "cursor-wait"} ${(value.length > 0 || files.length > 0) ? "cursor-pointer" : "cursor-not-allowed"}`}
                   onClick={handleMainButtonClick}
                   disabled={!(value.length > 0 || files.length > 0) || !connected || partnerDisconnected || (isSubmitting && status !== "streaming")}
                   type="button"

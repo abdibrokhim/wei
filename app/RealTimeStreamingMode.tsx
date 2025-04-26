@@ -17,7 +17,7 @@ import { useEvent } from "@/app/contexts/EventContext";
 import { useHandleServerEvent } from "./hooks/useHandleServerEvent";
 
 // Utilities
-import { createRealtimeConnection } from "./lib/realtimeConnection";
+import { createRealtimeConnection } from "@/lib/realtimeConnection";
 
 // Agent configs
 import { allAgentSets, defaultAgentSetKey } from "@/app/agentConfigs";

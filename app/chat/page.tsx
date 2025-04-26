@@ -28,10 +28,10 @@ export default function ChatPage() {
 
   return (
     <>
-      <div className="container mx-auto p-2 space-y-6 pb-20">
+      <div className="@container/main relative flex h-full w-full flex-col items-center justify-end">
         <ChatInterface />
       </div>
-      <BottomNavigation />
+      {/* <BottomNavigation /> */}
     </>
   );
 } 

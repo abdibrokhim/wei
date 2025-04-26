@@ -2,10 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useDatabase } from "@/app/contexts/DatabaseContext";
-import { Button } from "@/components/ui/button";
-import { Clock, ChevronRight, Loader2, RefreshCw } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { CaretRight, ClockCounterClockwise } from "@phosphor-icons/react/dist/ssr";
 
 interface ChatHistoryProps {
   onSelectConversation: (conversation: any) => void;
@@ -59,7 +57,7 @@ export default function ChatHistory({ onSelectConversation }: ChatHistoryProps) 
               >
                 <div className="flex items-center gap-3">
                   <div className="flex-shrink-0">
-                    <Clock className="h-5 w-5 text-muted-foreground" />
+                    <ClockCounterClockwise className="h-5 w-5 text-muted-foreground" />
                   </div>
                   <div>
                     <p className="text-sm font-medium">
@@ -70,7 +68,7 @@ export default function ChatHistory({ onSelectConversation }: ChatHistoryProps) 
                     </p>
                   </div>
                 </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                <CaretRight className="size-4 text-muted-foreground" />
               </div>
             ))}
           </div>

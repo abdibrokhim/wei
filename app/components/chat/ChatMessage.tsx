@@ -36,7 +36,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
           : "bg-primary text-primary-foreground"
       )}>
         <p className="text-sm break-words">{message.content}</p>
-        <span className="text-xs opacity-70 mt-1 block text-right">
+        <span className="text-[10px] opacity-70 mt-1 block text-right">
           {new Date(message.timestamp).toLocaleTimeString([], { 
             hour: '2-digit', 
             minute: '2-digit' 

@@ -4,22 +4,21 @@ import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useChat } from "@/app/contexts/ChatContext";
 import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, RefreshCw, History } from "lucide-react";
 import ChatMessage from "./ChatMessage";
 import ChatHistory from "./ChatHistory";
 import {
   Drawer,
   DrawerContent,
-  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-
+import { ChatInput } from "../chat-input/chat-input";
+import { ArrowLeft, ListMagnifyingGlass, PencilSimpleLine } from "@phosphor-icons/react/dist/ssr";
+import { useRouter } from "next/navigation";
 interface ChatInterfaceProps {
   fullHeight?: boolean;
 }
@@ -30,8 +29,8 @@ export default function ChatInterface({ fullHeight }: ChatInterfaceProps) {
   const [isSending, setIsSending] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const pathname = usePathname();
+  const router = useRouter();
   
   // Determine if we're on the standalone chat page
   const isStandalonePage = pathname === "/chat";
@@ -58,17 +57,6 @@ export default function ChatInterface({ fullHeight }: ChatInterfaceProps) {
       console.error("Failed to send message:", error);
     } finally {
       setIsSending(false);
-      // Focus on input after sending
-      if (inputRef.current) {
-        inputRef.current.focus();
-      }
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
     }
   };
 
@@ -87,10 +75,18 @@ export default function ChatInterface({ fullHeight }: ChatInterfaceProps) {
   };
 
   return (
-    <Card className={`flex gap-4 bg-transparent border-none shadow-none flex-col py-2 ${useFullHeight ? 'h-[85vh]' : 'h-[70vh]'}`}>
-      <CardHeader className="pb-0 pt-0 px-0">
+    <Card className={`flex gap-4 bg-transparent border-none shadow-none flex-col p-2 ${useFullHeight ? 'h-[100dvh]' : 'h-[100dvh]'}`}>
+      <CardHeader className="pb-0 pt-0 px-0 border-b border-border [.border-b]:pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => router.back()}
+              title="Back to dashboard"
+            >
+              <ArrowLeft className="size-4" />
+            </Button>
             <Avatar className="h-8 w-8 bg-gradient-to-br from-pink-500 to-rose-500">
               <AvatarImage src="/wei-icon.png" alt="Wei Icon" />
               <AvatarFallback>WEI</AvatarFallback>
@@ -106,7 +102,7 @@ export default function ChatInterface({ fullHeight }: ChatInterfaceProps) {
                   size="icon" 
                   title="Chat History"
                 >
-                  <History className="h-4 w-4" />
+                  <ListMagnifyingGlass className="size-4" />
                 </Button>
               </DrawerTrigger>
               <DrawerContent>
@@ -122,7 +118,7 @@ export default function ChatInterface({ fullHeight }: ChatInterfaceProps) {
             </Drawer>
             
             <Button variant="ghost" size="icon" onClick={clearMessages} title="Reset chat">
-              <RefreshCw className="h-4 w-4" />
+              <PencilSimpleLine className="size-4" />
             </Button>
           </div>
         </div>
@@ -149,25 +145,20 @@ export default function ChatInterface({ fullHeight }: ChatInterfaceProps) {
         </div>
       </ScrollArea>
       
-      <CardFooter className="pt-0 px-0">
-        <div className="flex w-full gap-2">
-          <Input
-            placeholder="Type your message..."
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            disabled={isSending}
-            ref={inputRef}
-            className="flex-1"
-          />
-          <Button 
-            onClick={handleSendMessage} 
-            disabled={!inputValue.trim() || isSending}
-            size="icon"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
-        </div>
+      <CardFooter className="pt-0 px-0 w-full">
+        <ChatInput
+          value={inputValue}
+          onValueChange={setInputValue}
+          onSend={handleSendMessage}
+          isSubmitting={isSending}
+          files={[]}
+          onFileUpload={() => {}}
+          onFileRemove={() => {}}
+          stop={() => {}}
+          status={isSending ? "submitted" : "ready"}
+          connected={true}
+          partnerDisconnected={false}
+        />
       </CardFooter>
     </Card>
   );

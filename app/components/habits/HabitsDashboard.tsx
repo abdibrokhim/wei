@@ -94,7 +94,6 @@ export default function HabitsDashboard() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Your Habits</h2>
         <Button onClick={() => setIsNewHabitDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" /> Add Habit
         </Button>
@@ -104,7 +103,7 @@ export default function HabitsDashboard() {
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input 
           placeholder="Search habits..." 
-          className="pl-10" 
+          className="pl-10 placeholder:text-sm" 
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />

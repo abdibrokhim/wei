@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useDatabase } from "@/app/contexts/DatabaseContext";
 import { formatDistanceToNow } from "date-fns";
-import { CaretRight, ClockCounterClockwise } from "@phosphor-icons/react/dist/ssr";
+import { CaretRight, ClockCounterClockwise, MagnifyingGlass } from "@phosphor-icons/react/dist/ssr";
+import { Input } from "@/components/ui/input";
 
 interface ChatHistoryProps {
   onSelectConversation: (conversation: any) => void;
@@ -14,7 +15,8 @@ export default function ChatHistory({ onSelectConversation }: ChatHistoryProps) 
   const [conversationHistory, setConversationHistory] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  
+  const [searchQuery, setSearchQuery] = useState("");
+
   const loadConversationHistory = async () => {
     setIsLoading(true);
     try {
@@ -38,6 +40,15 @@ export default function ChatHistory({ onSelectConversation }: ChatHistoryProps) 
 
   return (
     <div className="flex flex-col h-full">
+      <div className="relative">
+        <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input 
+          placeholder="Search recent chats..." 
+          className="pl-10 placeholder:text-sm" 
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
       <div className="flex-1 px-0 overflow-y-auto" ref={scrollAreaRef}>
         {isLoading ? (
           <div className="flex justify-center py-8">
@@ -49,7 +60,9 @@ export default function ChatHistory({ onSelectConversation }: ChatHistoryProps) 
           </div>
         ) : (
           <div className="space-y-2 my-4 h-[60vh] overflow-y-auto">
-            {conversationHistory.map((conversation) => (
+            {conversationHistory.filter(conversation => 
+              conversation.messages[1]?.content.toLowerCase().includes(searchQuery.toLowerCase())
+            ).map((conversation) => (
               <div
                 key={conversation.id}
                 className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted cursor-pointer"

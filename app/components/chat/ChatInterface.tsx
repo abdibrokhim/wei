@@ -19,6 +19,7 @@ import {
 import { ChatInput } from "../chat-input/chat-input";
 import { ArrowLeft, ListMagnifyingGlass, PencilSimpleLine } from "@phosphor-icons/react/dist/ssr";
 import { useRouter } from "next/navigation";
+import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
 interface ChatInterfaceProps {
   fullHeight?: boolean;
 }
@@ -139,7 +140,11 @@ export default function ChatInterface({ fullHeight }: ChatInterfaceProps) {
                 <AvatarImage src="/wei-icon.png" alt="Wei Icon" />
                 <AvatarFallback>WEI</AvatarFallback>
               </Avatar>
-              <span className="text-sm text-muted-foreground">Wei is typing...</span>
+              <span className="text-sm text-muted-foreground">
+                <TextShimmer>
+                  Wei is typing...
+                </TextShimmer>
+              </span>
             </div>
           )}
         </div>

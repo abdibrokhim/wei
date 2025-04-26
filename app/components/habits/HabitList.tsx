@@ -93,7 +93,7 @@ export default function HabitList({ habits, onHabitsChanged }: HabitListProps) {
                 disabled={completedHabits.has(habit.id) || loading.has(habit.id)}
                 onClick={() => handleCompleteHabit(habit.id)}
                 className={`rounded-full h-8 w-8 ${
-                  completedHabits.has(habit.id) ? 'text-green-500' : ''
+                  completedHabits.has(habit.id) ? 'text-primary' : ''
                 }`}
               >
                 {completedHabits.has(habit.id) ? (

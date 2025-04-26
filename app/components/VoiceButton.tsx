@@ -33,7 +33,7 @@ const VoiceButton: React.FC<VoiceButtonProps> = ({
               onClick={handleActivateVoice}
               variant="default"
               size="icon"
-              className="rounded-full w-10 h-10 shadow-lg bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600"
+              className="rounded-full w-10 h-10 shadow-lg text-white bg-gradient-to-r hover:from-pink-500 hover:to-rose-500 from-pink-600 to-rose-600"
             >
               <Mic className="h-4 w-4" />
             </Button>

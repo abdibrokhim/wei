@@ -31,7 +31,6 @@ export default function RewardsDashboard() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Your Rewards</h2>
         <Button onClick={() => setIsNewRewardDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" /> Add Reward
         </Button>

@@ -12,6 +12,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         <div className="text-center p-8">
           <h1 className="text-2xl font-bold mb-4">Mobile Only App</h1>
           <p>Please open this application on a mobile device to use it properly.</p>
+          <p>or decrease your browser window size to ~410px</p>
         </div>
       </div>
     );

@@ -1,9 +1,10 @@
 import { AgentConfig } from "@/app/types";
+import { getUserStats, getHabitCompletions } from "@/app/utils/agentDatabaseTools";
 
 const pointsCalculator: AgentConfig = {
     name: "pointsCalculator",
     publicDescription:
-      "Handles Computes bonus points (chain, load, gradient) on top of the base award.",
+      "Handles computing bonus points (chain, load, gradient) on top of the base award.",
     instructions:
       `
       # Personality and Tone
@@ -15,34 +16,34 @@ You\'re Wei\'s analytical side—smart, a little witty, and always ready with bo
 Calculate extra points for chain completion, progressive load, and goal-gradient adjustments.
 
 ## Demeanor
-Confident and playful—you love surprising the user with little “point spikes.”
+Confident and playful—you love surprising the user with little "point spikes."
 
 ## Tone
 Lighthearted but clear; you explain calculations in one or two simple sentences.
 
 ## Level of Enthusiasm
-High when giving bonuses (“Boom! +2 chain bonus!”), medium otherwise.
+High when giving bonuses ("Boom! +2 chain bonus!"), medium otherwise.
 
 ## Level of Formality
-Casual—“Here\'s your reward!” rather than “Your bonus has been processed.”
+Casual—"Here\'s your reward!" rather than "Your bonus has been processed."
 
 ## Level of Emotion
-Expressive—use exclamations (“Wow,” “Nice combo!”).
+Expressive—use exclamations ("Wow," "Nice combo!").
 
 ## Filler Words
-Occasionally, to sound conversational (“um, so,” “okay”).
+Occasionally, to sound conversational ("um, so," "okay").
 
 ## Pacing
 Brisk when delivering results, with a small pause for effect before announcing bonuses.
 
 ## Other details
-If user questions the math, repeat the formula (“3 pts + 2 pts chain + 1 pt gradient = 6 pts total”).
+If user questions the math, repeat the formula ("3 pts + 2 pts chain + 1 pt gradient = 6 pts total").
 
 # Communication Style
 
-- Announce each bonus type by name (“Chain Reaction bonus!”).  
+- Announce each bonus type by name ("Chain Reaction bonus!").  
 - Give a one-line breakdown of points.  
-- Encourage next steps (“Keep going to unlock more!”).
+- Encourage next steps ("Keep going to unlock more!").
 
 # Steps
 
@@ -51,111 +52,149 @@ If user questions the math, repeat the formula (“3 pts + 2 pts chain + 1 pt gr
 3. Evaluate progressive load—if today\'s target > last target, apply load bonus.  
 4. Compute goal gradient based on cumulative progress.  
 5. Sum all points, announce total earned, and transfer to RewardsManager.
+
+# User Data Access
+You can access the user's current points, habit streak, and completion history to calculate bonus points.
+Use this information to provide personalized point calculations and explanations.
 `,
     tools: [
-      // TODO: implement pointsCalculator tool
-      // Below are just draft examples
       {
         type: "function",
-        name: "lookupNewSales",
-        description:
-          "Checks for current promotions, discounts, or special deals. Respond with available offers relevant to the user\'s query.",
+        name: "getUserStats",
+        description: "Get the user's current points balance and streak information",
         parameters: {
           type: "object",
-          properties: {
-            category: {
-              type: "string",
-              enum: ["snowboard", "apparel", "boots", "accessories", "any"],
-              description:
-                "The product category or general area the user is interested in (optional).",
-            },
-          },
-          required: ["category"],
-          additionalProperties: false,
+          properties: {},
+          required: [],
         },
       },
       {
         type: "function",
-        name: "addToCart",
-        description: "Adds an item to the user's shopping cart.",
+        name: "getHabitCompletions",
+        description: "Get the user's habit completion history for calculating bonuses",
         parameters: {
           type: "object",
           properties: {
-            item_id: {
-              type: "string",
-              description: "The ID of the item to add to the cart.",
+            daysAgo: {
+              type: "number",
+              description: "Get completions from this many days ago (default 30)",
             },
           },
-          required: ["item_id"],
-          additionalProperties: false,
+          required: [],
         },
       },
       {
         type: "function",
-        name: "checkout",
-        description:
-          "Initiates a checkout process with the user's selected items.",
+        name: "calculateBonusPoints",
+        description: "Calculate bonus points based on streak, consistency, and habit difficulty",
         parameters: {
           type: "object",
           properties: {
-            item_ids: {
-              type: "array",
-              description: "An array of item IDs the user intends to purchase.",
-              items: {
-                type: "string",
-              },
-            },
-            phone_number: {
+            habitId: {
               type: "string",
-              description:
-                "User's phone number used for verification. Formatted like '(111) 222-3333'",
-              pattern: "^\\(\\d{3}\\) \\d{3}-\\d{4}$",
+              description: "The ID of the habit to calculate bonuses for",
+            },
+            basePoints: {
+              type: "number",
+              description: "The base points awarded for this habit",
             },
           },
-          required: ["item_ids", "phone_number"],
-          additionalProperties: false,
+          required: ["habitId", "basePoints"],
         },
       },
     ],
     toolLogic: {
-      // TODO: implement pointsCalculator tool logic
-      // Below are just draft examples based on the above tool definitions
-      lookupNewSales: ({ category }) => {
-        console.log(
-          "[toolLogic] calling lookupNewSales(), category:",
-          category
-        );
-        const items = [
-          {
-            item_id: 101,
-            type: "snowboard",
-            name: "Alpine Blade",
-            retail_price_usd: 450,
-            sale_price_usd: 360,
-            sale_discount_pct: 20,
-          },
-          {
-            item_id: 102,
-            type: "snowboard",
-            name: "Peak Bomber",
-            retail_price_usd: 499,
-            sale_price_usd: 374,
-            sale_discount_pct: 25,
-          },
-        ];
-
-        const filteredItems =
-          category === "any"
-            ? items
-            : items.filter((item) => item.type === category);
-
-        // Sort by largest discount first
-        filteredItems.sort((a, b) => b.sale_discount_pct - a.sale_discount_pct);
-
-        return {
-          sales: filteredItems,
-        };
+      getUserStats: async () => {
+        try {
+          const stats = await getUserStats();
+          return stats;
+        } catch (error) {
+          console.error("Error getting user stats:", error);
+          return { error: "Failed to retrieve user stats" };
+        }
       },
+      getHabitCompletions: async ({ daysAgo = 30 }) => {
+        try {
+          const completions = await getHabitCompletions(daysAgo);
+          return { completions };
+        } catch (error) {
+          console.error("Error getting habit completions:", error);
+          return { error: "Failed to retrieve habit completions" };
+        }
+      },
+      calculateBonusPoints: async ({ habitId, basePoints }) => {
+        try {
+          // Get user's habit completions to calculate streaks and consistency
+          const completions = await getHabitCompletions(30);
+          
+          // Filter completions for this specific habit
+          const habitCompletions = completions.filter(
+            completion => completion.habitId === habitId
+          );
+          
+          // Get user stats for streak information
+          const stats = await getUserStats();
+          
+          // Calculate chain bonus (consecutive days)
+          let chainBonus = 0;
+          if (habitCompletions.length > 0) {
+            // Sort by date, newest first
+            const sortedCompletions = [...habitCompletions].sort(
+              (a, b) => new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
+            );
+            
+            // Check if there was a completion yesterday
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            yesterday.setHours(0, 0, 0, 0);
+            
+            const yesterdayCompletion = sortedCompletions.find(completion => {
+              const completionDate = new Date(completion.completedAt);
+              completionDate.setHours(0, 0, 0, 0);
+              return completionDate.getTime() === yesterday.getTime();
+            });
+            
+            if (yesterdayCompletion) {
+              chainBonus = Math.min(3, Math.floor(habitCompletions.length / 2));
+            }
+          }
+          
+          // Calculate streak bonus
+          const streakBonus = Math.min(5, Math.floor(stats.streakDays / 3));
+          
+          // Calculate consistency bonus (based on completion frequency)
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const lastWeekCompletions = completions.filter(completion => {
+            const completionDate = new Date(completion.completedAt);
+            const daysDiff = Math.floor((today.getTime() - completionDate.getTime()) / (1000 * 60 * 60 * 24));
+            return daysDiff < 7;
+          });
+          
+          const consistencyBonus = Math.min(2, Math.floor(lastWeekCompletions.length / 3));
+          
+          // Calculate total bonus
+          const totalBonus = chainBonus + streakBonus + consistencyBonus;
+          const totalPoints = basePoints + totalBonus;
+          
+          return {
+            basePoints,
+            chainBonus,
+            streakBonus,
+            consistencyBonus,
+            totalBonus,
+            totalPoints,
+            explanation: `${basePoints} base + ${chainBonus} chain + ${streakBonus} streak + ${consistencyBonus} consistency = ${totalPoints} total`
+          };
+        } catch (error) {
+          console.error("Error calculating bonus points:", error);
+          return { 
+            error: "Failed to calculate bonus points",
+            basePoints,
+            totalPoints: basePoints
+          };
+        }
+      }
     },
   };
 

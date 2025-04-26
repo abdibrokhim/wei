@@ -45,58 +45,58 @@ const VoiceTranscriptOverlay: React.FC<VoiceTranscriptOverlayProps> = ({
   };
 
   // Get only last 10 message items for display
-  // const recentMessages = transcriptItems
-  //   .filter((item) => item.type === "MESSAGE" && !item.isHidden)
-  //   .slice(-10);
+  const recentMessages = transcriptItems
+    .filter((item) => item.type === "MESSAGE" && !item.isHidden)
+    .slice(-10);
   
   // [Mock data] recentMessages
-  const recentMessages = [
-    {
-      itemId: "1",
-      role: "assistant",
-      title: "Hello, how can I help you today?",
-    },
-    {
-      itemId: "2",
-      role: "user",
-      title: "I need help with my account",
-    },
-    {
-      itemId: "3",
-      role: "assistant",
-      title: "I'm sorry, I can't help with that. Please try again.",
-    },
-    {
-      itemId: "4",
-      role: "user",
-      title: "I need help with my account",
-    },
-    {
-      itemId: "5",
-      role: "assistant",
-      title: "I'm sorry, I can't help with that. Please try again.",
-    },
-    {
-      itemId: "6",
-      role: "user",
-      title: "I need help with my account",
-    },
-    {
-      itemId: "7",
-      role: "assistant",
-      title: "I'm sorry, I can't help with that. Please try again.",
-    },
-    {
-      itemId: "8",
-      role: "user",
-      title: "I need help with my account",
-    },
-    {
-      itemId: "9",
-      role: "assistant",
-      title: "I'm sorry, I can't help with that. Please try again.",
-    },
-  ];
+  // const recentMessages = [
+  //   {
+  //     itemId: "1",
+  //     role: "assistant",
+  //     title: "Hello, how can I help you today?",
+  //   },
+  //   {
+  //     itemId: "2",
+  //     role: "user",
+  //     title: "I need help with my account",
+  //   },
+  //   {
+  //     itemId: "3",
+  //     role: "assistant",
+  //     title: "I'm sorry, I can't help with that. Please try again.",
+  //   },
+  //   {
+  //     itemId: "4",
+  //     role: "user",
+  //     title: "I need help with my account",
+  //   },
+  //   {
+  //     itemId: "5",
+  //     role: "assistant",
+  //     title: "I'm sorry, I can't help with that. Please try again.",
+  //   },
+  //   {
+  //     itemId: "6",
+  //     role: "user",
+  //     title: "I need help with my account",
+  //   },
+  //   {
+  //     itemId: "7",
+  //     role: "assistant",
+  //     title: "I'm sorry, I can't help with that. Please try again.",
+  //   },
+  //   {
+  //     itemId: "8",
+  //     role: "user",
+  //     title: "I need help with my account",
+  //   },
+  //   {
+  //     itemId: "9",
+  //     role: "assistant",
+  //     title: "I'm sorry, I can't help with that. Please try again.",
+  //   },
+  // ];
 
   const isConnected = connectionStatus === "CONNECTED";
   const isConnecting = connectionStatus === "CONNECTING";
@@ -127,7 +127,7 @@ const VoiceTranscriptOverlay: React.FC<VoiceTranscriptOverlayProps> = ({
             </CardTitle>
           </CardHeader>
           <CardContent className="px-2">
-            <div className="h-[70vh] pr-4 overflow-y-auto" ref={scrollRef}>
+            <div className="h-[70vh] overflow-y-auto" ref={scrollRef}>
               <div className="space-y-4">
                 {recentMessages.length > 0 ? (
                   recentMessages.map((item) => (

@@ -4,8 +4,9 @@ import VoiceVisualization from "./VoiceVisualization";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff, X } from "lucide-react";
+import { X } from "@phosphor-icons/react/dist/ssr";
 import { SessionStatus } from "@/app/types";
+import BottomToolbar from "./BottomToolbar";
 
 interface VoiceTranscriptOverlayProps {
   isVisible: boolean;
@@ -44,58 +45,58 @@ const VoiceTranscriptOverlay: React.FC<VoiceTranscriptOverlayProps> = ({
   };
 
   // Get only last 10 message items for display
-  const recentMessages = transcriptItems
-    .filter((item) => item.type === "MESSAGE" && !item.isHidden)
-    .slice(-10);
+  // const recentMessages = transcriptItems
+  //   .filter((item) => item.type === "MESSAGE" && !item.isHidden)
+  //   .slice(-10);
   
   // [Mock data] recentMessages
-  // const recentMessages = [
-  //   {
-  //     itemId: "1",
-  //     role: "assistant",
-  //     title: "Hello, how can I help you today?",
-  //   },
-  //   {
-  //     itemId: "2",
-  //     role: "user",
-  //     title: "I need help with my account",
-  //   },
-  //   {
-  //     itemId: "3",
-  //     role: "assistant",
-  //     title: "I'm sorry, I can't help with that. Please try again.",
-  //   },
-  //   {
-  //     itemId: "4",
-  //     role: "user",
-  //     title: "I need help with my account",
-  //   },
-  //   {
-  //     itemId: "5",
-  //     role: "assistant",
-  //     title: "I'm sorry, I can't help with that. Please try again.",
-  //   },
-  //   {
-  //     itemId: "6",
-  //     role: "user",
-  //     title: "I need help with my account",
-  //   },
-  //   {
-  //     itemId: "7",
-  //     role: "assistant",
-  //     title: "I'm sorry, I can't help with that. Please try again.",
-  //   },
-  //   {
-  //     itemId: "8",
-  //     role: "user",
-  //     title: "I need help with my account",
-  //   },
-  //   {
-  //     itemId: "9",
-  //     role: "assistant",
-  //     title: "I'm sorry, I can't help with that. Please try again.",
-  //   },
-  // ];
+  const recentMessages = [
+    {
+      itemId: "1",
+      role: "assistant",
+      title: "Hello, how can I help you today?",
+    },
+    {
+      itemId: "2",
+      role: "user",
+      title: "I need help with my account",
+    },
+    {
+      itemId: "3",
+      role: "assistant",
+      title: "I'm sorry, I can't help with that. Please try again.",
+    },
+    {
+      itemId: "4",
+      role: "user",
+      title: "I need help with my account",
+    },
+    {
+      itemId: "5",
+      role: "assistant",
+      title: "I'm sorry, I can't help with that. Please try again.",
+    },
+    {
+      itemId: "6",
+      role: "user",
+      title: "I need help with my account",
+    },
+    {
+      itemId: "7",
+      role: "assistant",
+      title: "I'm sorry, I can't help with that. Please try again.",
+    },
+    {
+      itemId: "8",
+      role: "user",
+      title: "I need help with my account",
+    },
+    {
+      itemId: "9",
+      role: "assistant",
+      title: "I'm sorry, I can't help with that. Please try again.",
+    },
+  ];
 
   const isConnected = connectionStatus === "CONNECTED";
   const isConnecting = connectionStatus === "CONNECTING";
@@ -113,7 +114,7 @@ const VoiceTranscriptOverlay: React.FC<VoiceTranscriptOverlayProps> = ({
           onClick={onClose}
           variant="ghost" 
           size="icon"
-          className="absolute top-2 right-2 rounded-full bg-background shadow-md z-10"
+          className="absolute top-2 right-2 rounded-lg shadow-md z-10"
         >
           <X className="h-4 w-4" />
         </Button>
@@ -157,7 +158,7 @@ const VoiceTranscriptOverlay: React.FC<VoiceTranscriptOverlayProps> = ({
                     </div>
                   ))
                 ) : (
-                  <p className="text-center text-muted-foreground pt-10">
+                  <p className="text-center justify-center text-sm text-muted-foreground pt-10">
                     {isConnected 
                       ? "Ready! Hold the button and speak..."
                       : isConnecting
@@ -170,31 +171,14 @@ const VoiceTranscriptOverlay: React.FC<VoiceTranscriptOverlayProps> = ({
             
             <div className="flex flex-col items-center mt-4 gap-4">
               <VoiceVisualization isAssistantSpeaking={isAssistantSpeaking} />
-              
+
               {/* Push to Talk Button */}
-              <Button
-                onMouseDown={handleTalkButtonDown}
-                onMouseUp={handleTalkButtonUp}
-                onTouchStart={handleTalkButtonDown}
-                onTouchEnd={handleTalkButtonUp}
-                variant={isPTTUserSpeaking ? "destructive" : "default"}
-                size="lg"
-                className="rounded-full h-10 w-10 shadow-lg"
-                disabled={!isConnected}
-              >
-                {isPTTUserSpeaking ? (
-                  <MicOff className="h-6 w-6" />
-                ) : (
-                  <Mic className="h-6 w-6" />
-                )}
-              </Button>
-              <p className="text-sm text-center text-muted-foreground">
-                {!isConnected 
-                  ? "Waiting for connection..." 
-                  : isPTTUserSpeaking 
-                    ? "Release to stop recording" 
-                    : "Hold to speak"}
-              </p>
+              <BottomToolbar
+                isPTTUserSpeaking={isPTTUserSpeaking}
+                handleTalkButtonDown={handleTalkButtonDown}
+                handleTalkButtonUp={handleTalkButtonUp}
+                isConnected={isConnected}
+              />
             </div>
           </CardContent>
         </Card>

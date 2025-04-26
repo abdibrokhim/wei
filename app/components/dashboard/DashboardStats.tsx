@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useDatabase } from "@/app/contexts/DatabaseContext";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+// import { ChartBar } from "@phosphor-icons/react/dist/ssr";
+// import { ChartLine } from "@phosphor-icons/react/dist/ssr";
 import { BarChart } from "lucide-react";
 
 export default function DashboardStats() {

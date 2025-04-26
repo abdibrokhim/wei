@@ -4,16 +4,15 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { 
   Card, 
-  CardContent, 
-  CardDescription, 
+  CardContent,
   CardHeader, 
   CardTitle 
 } from "@/components/ui/card";
+import { Leaf } from "@phosphor-icons/react/dist/ssr";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useDatabase } from "@/app/contexts/DatabaseContext";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
@@ -22,13 +21,12 @@ import {
   Flame, 
   Calendar, 
   BarChart, 
-  User,
-  Mail,
   Edit,
   Sparkles,
-  TrendingUp,
-  Clock
 } from "lucide-react";
+import { WeiDB } from "@/app/types/database";
+import EditProfileDrawer from "./EditProfileDrawer";
+import { MAX_FILE_SIZE } from "@/lib/config";
 
 interface Activity {
   id: number;
@@ -39,24 +37,49 @@ interface Activity {
 }
 
 export default function ProfileDashboard() {
-  const { userPoints, getCompletions, getHabits } = useDatabase();
+  const { userPoints, getCompletions, getHabits, getUserProfile, saveUserProfile } = useDatabase();
   const [activeTab, setActiveTab] = useState("overview");
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editableUserData, setEditableUserData] = useState({
-    name: "Jane Doe",
-    email: "jane@example.com",
+  const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
+  const [profileData, setProfileData] = useState<WeiDB['userProfile']['value']>({
+    id: 'default',
+    name: "User",
+    email: "user@example.com",
+    bio: "No bio yet",
+    avatarUrl: "",
+    joinDate: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
   });
+  
+  const [editableProfileData, setEditableProfileData] = useState<WeiDB['userProfile']['value']>(profileData);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [streak, setStreak] = useState(0);
   const [completionRate, setCompletionRate] = useState("0%");
   const [recentActivities, setRecentActivities] = useState<Activity[]>([]);
   
-  // Mock achievements for now - in a real app, these would come from the database
+  // Achievements data
   const achievements = [
-    { id: 1, name: "First Step", description: "Complete your first habit", icon: "🌱", earned: true },
-    { id: 2, name: "Week Warrior", description: "7 day streak", icon: "🔥", earned: true },
-    { id: 3, name: "Early Bird", description: "Complete a habit before 8am", icon: "🌅", earned: false },
-    { id: 4, name: "Night Owl", description: "Complete a habit after 10pm", icon: "🌙", earned: false }
+    { id: 1, name: "First Step", description: "Complete your first habit", earned: true },
+    { id: 2, name: "Week Warrior", description: "7 day streak", earned: true },
+    { id: 3, name: "Early Bird", description: "Complete a habit before 8am", earned: false },
+    { id: 4, name: "Night Owl", description: "Complete a habit after 10pm", earned: false }
   ];
+  
+  // Load user profile from IndexedDB
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      try {
+        const profile = await getUserProfile();
+        if (profile) {
+          setProfileData(profile);
+          setEditableProfileData(profile);
+        }
+      } catch (error) {
+        console.error('Failed to load user profile:', error);
+      }
+    };
+    
+    loadUserProfile();
+  }, [getUserProfile]);
   
   // Load user stats
   useEffect(() => {
@@ -116,114 +139,154 @@ export default function ProfileDashboard() {
   }, [getCompletions, getHabits]);
   
   const handleEditProfile = () => {
-    setIsEditDialogOpen(true);
+    setIsEditDrawerOpen(true);
   };
   
-  const handleSaveProfile = () => {
-    // In a real app, you would save this to the database
-    setIsEditDialogOpen(false);
-    toast.success("Profile updated successfully!");
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Validate file is an image and not too large
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+    
+    if (file.size > MAX_FILE_SIZE) { // 5MB limit
+      toast.error('Image too large. Please select an image under 5MB');
+      return;
+    }
+    
+    setImageFile(file);
+    
+    // Create preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+  
+  const handleSaveProfile = async () => {
+    try {
+      // Process the image file if it exists
+      let avatarUrl = profileData.avatarUrl;
+      if (imageFile) {
+        avatarUrl = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            resolve(reader.result as string);
+          };
+          reader.readAsDataURL(imageFile);
+        });
+      }
+      
+      // Create updated profile data
+      const updatedProfile = {
+        ...editableProfileData,
+        avatarUrl,
+        id: 'default', // Ensure we're using the same ID
+      };
+      
+      // Save to IndexedDB
+      await saveUserProfile(updatedProfile);
+      
+      // Update state
+      setProfileData(updatedProfile);
+      setIsEditDrawerOpen(false);
+      setImageFile(null);
+      setImagePreview(null);
+      
+      toast.success('Profile updated successfully!');
+    } catch (error) {
+      console.error('Failed to save profile:', error);
+      toast.error('Failed to update profile');
+    }
   };
   
   return (
-    <div className="space-y-6">
-      <Card className="py-4">
-        <CardContent className="pt-0">
-          <div className="flex flex-col items-center md:flex-row md:items-start md:space-x-6">
-            <Avatar className="h-24 w-24">
-              <AvatarImage src="/wei-icon.jpg" alt={editableUserData.name} />
-              <AvatarFallback>{editableUserData.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-            </Avatar>
-            
-            <div className="mt-4 md:mt-0 text-center md:text-left flex-1">
-              <h1 className="text-2xl font-bold">{editableUserData.name}</h1>
-              <p className="text-muted-foreground">{editableUserData.email}</p>
-              <p className="text-sm text-muted-foreground">Member since March 2023</p>
+    <div className="space-y-4">
+      {/* Profile Header - Instagram Style */}
+      <Card className="bg-transparent border-none shadow-none flex-col p-0">
+        <CardContent className="p-0">
+          <div className="flex items-start gap-4">
+            {/* Profile Image */}
+            <div className="relative">
+              <Avatar className="h-20 w-20 border-1 border-foreground">
+                <AvatarImage src={profileData.avatarUrl || "/wei-icon.png"} alt={profileData.name} />
+                <AvatarFallback>{profileData.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+              </Avatar>
+              <Button 
+                variant="secondary" 
+                size="icon" 
+                className="absolute bottom-0 right-0 size-6 rounded-full opacity-90"
+                onClick={handleEditProfile}
+              >
+                <Edit className="size-3" />
+              </Button>
             </div>
             
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="mt-4 md:mt-0 md:self-start flex items-center gap-2"
-              onClick={handleEditProfile}
-            >
-              <Edit className="h-4 w-4" />
-              Edit Profile
-            </Button>
+            {/* Profile Info */}
+            <div className="flex-1 space-y-1">
+              <div className="flex items-center justify-between">
+                <h1 className="text-lg font-bold">{profileData.name}</h1>
+              </div>
+              <p className="text-sm text-muted-foreground">{profileData.email}</p>
+              <p className="text-[10px] text-muted-foreground/70">Member since {profileData.joinDate}</p>
+              
+              {profileData.bio && (
+                <p className="mt-2 text-sm">{profileData.bio}</p>
+              )}
+            </div>
+          </div>
+          
+          {/* Stats Row */}
+          <div className="grid grid-cols-3 gap-2 mt-4">
+            <div className="relative flex flex-col items-center text-center p-2 rounded-md">
+              <span className="text-lg font-semibold">{streak}</span>
+              <span className="text-xs text-muted-foreground">Day Streak</span>
+            </div>
+            
+            <div className="relative flex flex-col items-center text-center p-2 rounded-md">
+              <span className="text-lg font-semibold">{completionRate}</span>
+              <span className="text-xs text-muted-foreground">Completion</span>
+            </div>
+            
+            <div className="relative flex flex-col items-center text-center p-2 rounded-md">
+              <span className="text-lg font-semibold">{userPoints}</span>
+              <span className="text-xs text-muted-foreground">Points</span>
+            </div>
           </div>
         </CardContent>
       </Card>
       
-      <div className="grid grid-cols-3 gap-4">
-        <Card className="py-2 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900 border-orange-200 dark:border-orange-800">
-          <CardContent className="pt-2 px-2">
-            <div className="flex flex-col items-center text-center space-y-2">
-              <div className="rounded-full bg-orange-100 dark:bg-orange-800 p-3">
-                <Flame className="h-6 w-6 text-orange-500" />
-              </div>
-              <div className="space-y-1">
-                <h2 className="text-3xl font-bold">{streak}</h2>
-                <p className="text-sm font-medium">Day Streak</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="py-2 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 border-blue-200 dark:border-blue-800">
-          <CardContent className="pt-2 px-2">
-            <div className="flex flex-col items-center text-center space-y-2">
-              <div className="rounded-full bg-blue-100 dark:bg-blue-800 p-3">
-                <BarChart className="h-6 w-6 text-blue-500" />
-              </div>
-              <div className="space-y-1">
-                <h2 className="text-3xl font-bold">{completionRate}</h2>
-                <p className="text-sm font-medium">Completion Rate</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="py-2 bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-950 dark:to-yellow-900 border-yellow-200 dark:border-yellow-800">
-          <CardContent className="pt-2 px-2">
-            <div className="flex flex-col items-center text-center space-y-2">
-              <div className="rounded-full bg-yellow-100 dark:bg-yellow-800 p-3">
-                <Award className="h-6 w-6 text-yellow-500" />
-              </div>
-              <div className="space-y-1">
-                <h2 className="text-3xl font-bold">{userPoints}</h2>
-                <p className="text-sm font-medium">Total Points</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-      
-      <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
+      {/* Tabs for Activity and Achievements */}
+      <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2 bg-transparent border-none">
+          <TabsTrigger value="overview">Activity</TabsTrigger>
           <TabsTrigger value="achievements">Achievements</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="overview" className="mt-6 space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
+        <TabsContent value="overview" className="mt-2 space-y-4">
+          <Card className="">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
                 Recent Activity
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {recentActivities.length === 0 ? (
-                  <p className="text-center text-muted-foreground">No recent activity found.</p>
+                  <p className="text-center text-muted-foreground text-sm">No recent activity found.</p>
                 ) : (
                   recentActivities.map((activity) => (
-                    <div key={activity.id} className="flex justify-between items-center border-b pb-3 last:border-0 last:pb-0">
+                    <div key={activity.id} className="flex justify-between items-center border-b border-border pb-2 last:border-0 last:pb-0">
                       <div>
-                        <p className="font-medium">{activity.action} {activity.target}</p>
-                        <p className="text-sm text-muted-foreground">{activity.date}</p>
+                        <p className="text-sm font-medium">{activity.action} {activity.target}</p>
+                        <p className="text-xs text-muted-foreground">{activity.date}</p>
                       </div>
-                      <Badge variant={activity.points > 0 ? "default" : "destructive"}>
+                      <Badge variant={activity.points > 0 ? "default" : "destructive"} className="text-xs">
                         {activity.points > 0 ? `+${activity.points}` : activity.points} pts
                       </Badge>
                     </div>
@@ -234,25 +297,24 @@ export default function ProfileDashboard() {
           </Card>
         </TabsContent>
         
-        <TabsContent value="achievements" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <TabsContent value="achievements" className="mt-2">
+          <div className="grid grid-cols-2 gap-3">
             {achievements.map(achievement => (
               <Card 
                 key={achievement.id}
-                className={achievement.earned ? "bg-primary-50 border-primary-200 dark:bg-primary-950 dark:border-primary-800" : "opacity-60"}
+                className={`bg-card p-2 ${achievement.earned ? "" : "opacity-60"}`}
               >
-                <CardContent className="pt-6 flex items-center gap-4">
-                  <div className="text-4xl">{achievement.icon}</div>
-                  <div>
-                    <h3 className="font-medium flex items-center gap-2">
+                <CardContent className="relative p-1 flex flex-row items-center text-start gap-2">
+                  <div className="space-y-1 flex flex-col items-start">
+                    <h3 className="text-sm font-medium flex flex-col items-start gap-1">
                       {achievement.name}
-                      {achievement.earned && (
-                        <Badge variant="default" className="ml-1">
-                          <Sparkles className="h-3 w-3 mr-1" /> Earned
-                        </Badge>
-                      )}
                     </h3>
-                    <p className="text-sm text-muted-foreground">{achievement.description}</p>
+                    <p className="text-xs text-muted-foreground">{achievement.description}</p>
+                    {achievement.earned && (
+                      <Badge variant="default" className="text-[10px] absolute top-0 right-0">
+                        earned
+                      </Badge>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -261,36 +323,16 @@ export default function ProfileDashboard() {
         </TabsContent>
       </Tabs>
       
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Profile</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
-              <Input 
-                id="name" 
-                value={editableUserData.name}
-                onChange={(e) => setEditableUserData({...editableUserData, name: e.target.value})}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input 
-                id="email" 
-                type="email"
-                value={editableUserData.email}
-                onChange={(e) => setEditableUserData({...editableUserData, email: e.target.value})}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSaveProfile}>Save Changes</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Edit Profile Drawer */}
+      <EditProfileDrawer 
+        isEditDrawerOpen={isEditDrawerOpen}
+        setIsEditDrawerOpen={setIsEditDrawerOpen}
+        editableProfileData={editableProfileData}
+        setEditableProfileData={setEditableProfileData}
+        imagePreview={imagePreview || ""}
+        handleImageChange={handleImageChange}
+        handleSaveProfile={handleSaveProfile}
+      />
     </div>
   );
 } 

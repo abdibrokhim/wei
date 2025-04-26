@@ -16,6 +16,7 @@ import { ButtonEmojiPicker } from "./button-emoji-picker"
 import { ButtonGifPicker } from "./button-gif-picker"
 import { toast } from "sonner"
 import { Stop } from "@phosphor-icons/react"
+import { ButtonRecord } from "./button-record"
 // TODO: in the future we will add video chat
 // import { useVideoChat } from "../video-chat/video-chat-provider" 
 
@@ -340,6 +341,21 @@ export function ChatInput({
                   onStartVideoChat={() => {
                     toast.info("Video chat is Premium feature");
                   }}
+                  disabled={!connected || partnerDisconnected}
+                />
+              </div>
+
+              {/* Record Button */}
+              <div>
+                <ButtonRecord
+                  onStartRecord={() => {
+                    toast.info("Record is Premium feature");
+                  }}
+                  onStopRecord={() => {
+                    toast.info("Record is Premium feature");
+                  }}
+                  isPTTUserSpeaking={false}
+                  isConnected={connected}
                   disabled={!connected || partnerDisconnected}
                 />
               </div>

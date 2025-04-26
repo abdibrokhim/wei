@@ -1,12 +1,13 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Mic } from "lucide-react";
+
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Microphone } from "@phosphor-icons/react/dist/ssr";
 
 interface VoiceButtonProps {
   isListening: boolean;
@@ -33,13 +34,13 @@ const VoiceButton: React.FC<VoiceButtonProps> = ({
               onClick={handleActivateVoice}
               variant="default"
               size="icon"
-              className="rounded-full w-10 h-10 shadow-lg text-white bg-gradient-to-r hover:from-pink-500 hover:to-rose-500 from-pink-600 to-rose-600"
+              className="rounded-full w-10 h-10 shadow-lg"
             >
-              <Mic className="h-4 w-4" />
+              <Microphone className="size-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Click to start voice assistant</p>
+            <p>AI Voice Agent</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>

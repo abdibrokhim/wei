@@ -31,7 +31,7 @@ export function ButtonVideoChat({
           <VideoCamera className="size-4" />
         </Button>
       </TooltipTrigger>
-      <TooltipContent>Start video chat</TooltipContent>
+      <TooltipContent>Start streaming</TooltipContent>
     </Tooltip>
   )
 } 

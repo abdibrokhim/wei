@@ -66,4 +66,15 @@ export interface WeiDB extends DBSchema {
       createdAt: Date;
     };
   };
+  userProfile: {
+    key: string;
+    value: {
+      id: string;
+      name: string;
+      email: string;
+      bio: string;
+      avatarUrl: string;
+      joinDate: string;
+    };
+  };
 } 

@@ -21,6 +21,8 @@ interface DatabaseContextType {
   getUserData: () => Promise<WeiDB['user']['value'] | null>;
   saveConversation: (messages: WeiDB['conversations']['value']['messages']) => Promise<string>;
   getConversations: () => Promise<WeiDB['conversations']['value'][]>;
+  saveUserProfile: (profile: WeiDB['userProfile']['value']) => Promise<void>;
+  getUserProfile: () => Promise<WeiDB['userProfile']['value'] | null>;
 }
 
 const DatabaseContext = createContext<DatabaseContextType | null>(null);
@@ -42,29 +44,46 @@ export const DatabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     const initDB = async () => {
       try {
-        const database = await openDB<WeiDB>('wei-database', 1, {
-          upgrade(db) {
-            // Create object stores
-            const habitStore = db.createObjectStore('habits', { keyPath: 'id' });
-            habitStore.createIndex('by-category', 'category');
+        const database = await openDB<WeiDB>('wei-database', 2, {
+          upgrade(db, oldVersion, newVersion) {
+            // Create object stores if they don't exist
+            if (oldVersion < 1) {
+              const habitStore = db.createObjectStore('habits', { keyPath: 'id' });
+              habitStore.createIndex('by-category', 'category');
+              
+              const completionsStore = db.createObjectStore('completions', { keyPath: 'id' });
+              completionsStore.createIndex('by-habit', 'habitId');
+              completionsStore.createIndex('by-date', 'completedAt');
+              
+              db.createObjectStore('rewards', { keyPath: 'id' });
+              db.createObjectStore('rewardRedemptions', { keyPath: 'id' });
+              const userStore = db.createObjectStore('user', { keyPath: 'id' });
+              db.createObjectStore('conversations', { keyPath: 'id' });
+              
+              // Add default user
+              userStore.add({
+                id: 'default',
+                name: 'User',
+                points: 0,
+                streakDays: 0,
+                lastActive: new Date()
+              });
+            }
             
-            const completionsStore = db.createObjectStore('completions', { keyPath: 'id' });
-            completionsStore.createIndex('by-habit', 'habitId');
-            completionsStore.createIndex('by-date', 'completedAt');
-            
-            db.createObjectStore('rewards', { keyPath: 'id' });
-            db.createObjectStore('rewardRedemptions', { keyPath: 'id' });
-            const userStore = db.createObjectStore('user', { keyPath: 'id' });
-            db.createObjectStore('conversations', { keyPath: 'id' });
-            
-            // Add default user
-            userStore.add({
-              id: 'default',
-              name: 'User',
-              points: 0,
-              streakDays: 0,
-              lastActive: new Date()
-            });
+            // Add userProfile store in version 2
+            if (oldVersion < 2 && !db.objectStoreNames.contains('userProfile')) {
+              const userProfileStore = db.createObjectStore('userProfile', { keyPath: 'id' });
+              
+              // Add default profile
+              userProfileStore.add({
+                id: 'default',
+                name: 'User',
+                email: 'user@example.com',
+                bio: 'No bio yet',
+                avatarUrl: '',
+                joinDate: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+              });
+            }
           }
         });
         
@@ -237,6 +256,22 @@ export const DatabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (!db) return [];
     return db.getAll('conversations');
   };
+  
+  const saveUserProfile = async (profile: WeiDB['userProfile']['value']) => {
+    if (!db) throw new Error('Database not initialized');
+    await db.put('userProfile', profile);
+  };
+  
+  const getUserProfile = async (): Promise<WeiDB['userProfile']['value'] | null> => {
+    if (!db) return null;
+    try {
+      const profile = await db.get('userProfile', 'default');
+      return profile || null;
+    } catch (error) {
+      console.error('Failed to get user profile:', error);
+      return null;
+    }
+  };
 
   const value: DatabaseContextType = {
     db,
@@ -253,7 +288,9 @@ export const DatabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     redeemReward,
     getUserData,
     saveConversation,
-    getConversations
+    getConversations,
+    saveUserProfile,
+    getUserProfile
   };
 
   return (

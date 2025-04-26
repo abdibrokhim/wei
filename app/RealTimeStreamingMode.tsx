@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 
 // UI components
@@ -39,6 +39,8 @@ function RealTimeStreamingMode() {
   const audioElementRef = useRef<HTMLAudioElement | null>(null);
   const [sessionStatus, setSessionStatus] =
     useState<SessionStatus>("DISCONNECTED");
+
+  const pathname = usePathname();
 
   // Always keep logs hidden
   const [isEventsPaneExpanded, setIsEventsPaneExpanded] = useState<boolean>(false);
@@ -357,7 +359,7 @@ function RealTimeStreamingMode() {
     <>
       {/* Only render the voice button, nothing else in normal view */}
 
-      {!isVoiceModeActive && <VoiceButton 
+      {!isVoiceModeActive && pathname !== "/chat" && <VoiceButton 
         onClose={handleVoiceModeToggle}
         isListening={false}
         isConnected={false}

@@ -23,7 +23,7 @@ export default function RootLayout({
           <LayoutClient>
             {children}
           </LayoutClient>
-          <Toaster />
+          <Toaster position="top-center" theme="dark" />
         </main>
       </body>
     </html>

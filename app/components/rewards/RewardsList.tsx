@@ -67,9 +67,9 @@ export default function RewardsList({ rewards, onRewardsChanged }: RewardsListPr
       {rewards.map(reward => (
         <Card 
           key={reward.id} 
-          className="transition-all transform hover:-translate-y-1"
+          className="transition-all transform hover:-translate-y-1 py-4 gap-4"
         >
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-0 px-4">
             <CardTitle className="text-lg flex items-center gap-2">
               <Gift className="h-5 w-5 text-primary" />
               {reward.name}
@@ -77,7 +77,7 @@ export default function RewardsList({ rewards, onRewardsChanged }: RewardsListPr
             <CardDescription>{reward.description}</CardDescription>
           </CardHeader>
           
-          <CardFooter className="pt-2 flex justify-between items-center">
+          <CardFooter className="pt-0 flex justify-between items-center px-4">
             <Badge variant="secondary" className="gap-1 items-center">
               <Tag className="h-3 w-3" />
               <span>{reward.cost} points</span>

@@ -5,6 +5,7 @@ import { ThemeProvider } from "next-themes";
 import { TranscriptProvider } from "./contexts/TranscriptContext";
 import { EventProvider } from "./contexts/EventContext";
 import { DatabaseProvider } from "./contexts/DatabaseContext";
+import { UserCacheProvider } from "./contexts/UserCacheContext";
 import { ChatProvider } from "./contexts/ChatContext";
 import RealTimeStreamingMode from "./RealTimeStreamingMode";
 
@@ -12,14 +13,16 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
       <DatabaseProvider>
-        <ChatProvider>
-          <EventProvider>
-            <TranscriptProvider>
-              {children}
-              <RealTimeStreamingMode />
-            </TranscriptProvider>
-          </EventProvider>
-        </ChatProvider>
+        <UserCacheProvider>
+          <ChatProvider>
+            <EventProvider>
+              <TranscriptProvider>
+                {children}
+                <RealTimeStreamingMode />
+              </TranscriptProvider>
+            </EventProvider>
+          </ChatProvider>
+        </UserCacheProvider>
       </DatabaseProvider>
     </ThemeProvider>
   );

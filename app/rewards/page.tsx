@@ -1,10 +1,10 @@
 "use client";
 
 import { useDatabase } from "@/app/contexts/DatabaseContext";
-import { Skeleton } from "@/components/ui/skeleton";
 import DatabaseError from "@/app/components/errors/DatabaseError";
 import RewardsDashboard from "@/app/components/rewards/RewardsDashboard";
 import BottomNavigation from "@/app/components/dashboard/BottomNavigation";
+import DefaultLoading from "@/app/components/default-loading";
 
 export default function RewardsPage() {
   const { error, isLoading } = useDatabase();
@@ -15,14 +15,7 @@ export default function RewardsPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-4 space-y-6">
-        <Skeleton className="h-10 w-full rounded-lg" />
-        <div className="space-y-2">
-          {[...Array(5)].map((_, i) => (
-            <Skeleton key={i} className="h-16 w-full rounded-lg" />
-          ))}
-        </div>
-      </div>
+      <DefaultLoading text="loading..." />
     );
   }
 

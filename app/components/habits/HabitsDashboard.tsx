@@ -93,23 +93,24 @@ export default function HabitsDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <Button onClick={() => setIsNewHabitDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Add Habit
-        </Button>
-      </div>
-
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+      <div className="relative flex flex-row gap-2">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-muted-foreground" />
         <Input 
           placeholder="Search habits..." 
           className="pl-10 placeholder:text-sm" 
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
+        <Button 
+          onClick={() => setIsNewHabitDialogOpen(true)}
+          variant="default"
+          size="icon"
+        >
+          <Plus className="size-4" />
+        </Button>
       </div>
 
-      <div className="h-20 overflow-x-auto" ref={scrollAreaRef} style={{ scrollbarWidth: 'none' }}>
+      <div className="overflow-x-auto" ref={scrollAreaRef} style={{ scrollbarWidth: 'none' }}>
         <div className="flex space-x-2 pb-2">
           <Button
             variant={selectedCategory === "all" ? "default" : "outline"}

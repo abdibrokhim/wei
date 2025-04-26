@@ -25,7 +25,7 @@ interface ChatInterfaceProps {
 }
 
 export default function ChatInterface({ fullHeight }: ChatInterfaceProps) {
-  const { messages, isTyping, sendMessage, clearMessages, loadConversation } = useChat();
+  const { messages, isTyping, sendMessage, clearMessages, loadConversation, currentConversationId } = useChat();
   const [inputValue, setInputValue] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);

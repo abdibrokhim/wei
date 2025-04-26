@@ -67,7 +67,7 @@ export default function HabitList({ habits, onHabitsChanged }: HabitListProps) {
       {habits.map(habit => (
         <Card 
           key={habit.id} 
-          className={`transition-all transform hover:-translate-y-1 ${
+          className={`transition-all transform hover:-translate-y-1 py-0 ${
             completedHabits.has(habit.id) ? 'bg-primary/10 border-primary/30' : ''
           }`}
         >
@@ -84,7 +84,7 @@ export default function HabitList({ habits, onHabitsChanged }: HabitListProps) {
             
             <div className="flex items-center gap-3">
               <Badge variant="secondary" className="font-semibold">
-                {habit.points} pts
+                {habit.points > 1 ? `${habit.points} pts` : `${habit.points} pt`}
               </Badge>
               
               <Button

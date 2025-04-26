@@ -18,8 +18,9 @@ interface DatabaseContextType {
   addReward: (reward: Omit<WeiDB['rewards']['value'], 'id' | 'createdAt'>) => Promise<string>;
   getRewards: () => Promise<WeiDB['rewards']['value'][]>;
   redeemReward: (rewardId: string) => Promise<boolean>;
+  getRewardRedemptions: () => Promise<WeiDB['rewardRedemptions']['value'][]>;
   getUserData: () => Promise<WeiDB['user']['value'] | null>;
-  saveConversation: (messages: WeiDB['conversations']['value']['messages']) => Promise<string>;
+  saveConversation: (messages: WeiDB['conversations']['value']['messages'], conversationId?: string) => Promise<string>;
   getConversations: () => Promise<WeiDB['conversations']['value'][]>;
   saveUserProfile: (profile: WeiDB['userProfile']['value']) => Promise<void>;
   getUserProfile: () => Promise<WeiDB['userProfile']['value'] | null>;
@@ -233,21 +234,63 @@ export const DatabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return true;
   };
 
+  const getRewardRedemptions = async () => {
+    if (!db) return [];
+    return db.getAll('rewardRedemptions');
+  };
+
   const getUserData = async (): Promise<WeiDB['user']['value'] | null> => {
     if (!db) return null;
     const userData = await db.get('user', 'default');
     return userData || null;
   };
 
-  const saveConversation = async (messages: WeiDB['conversations']['value']['messages']) => {
+  const saveConversation = async (messages: WeiDB['conversations']['value']['messages'], conversationId?: string) => {
     if (!db) throw new Error('Database not initialized');
     
-    const id = `conversation_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    await db.add('conversations', {
-      id,
-      messages,
-      createdAt: new Date()
-    });
+    if (conversationId) {
+      // Update existing conversation
+      try {
+        const existingConversation = await db.get('conversations', conversationId);
+        if (existingConversation) {
+          await db.put('conversations', {
+            ...existingConversation,
+            messages,
+            updatedAt: new Date()
+          });
+          return conversationId;
+        }
+      } catch (error) {
+        console.error('Failed to update conversation:', error);
+        // If update fails, fall back to creating a new conversation
+      }
+    }
+    
+    // Create new conversation
+    const id = conversationId || `conversation_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    try {
+      await db.add('conversations', {
+        id,
+        messages,
+        createdAt: new Date()
+      });
+    } catch (error) {
+      // Handle the case where the conversation already exists but we couldn't update it
+      console.error('Failed to create conversation:', error);
+      if (conversationId) {
+        try {
+          // Try to overwrite the existing conversation as a last resort
+          await db.put('conversations', {
+            id,
+            messages,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          });
+        } catch (putError) {
+          console.error('Failed to overwrite conversation:', putError);
+        }
+      }
+    }
     
     return id;
   };
@@ -286,6 +329,7 @@ export const DatabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     addReward,
     getRewards,
     redeemReward,
+    getRewardRedemptions,
     getUserData,
     saveConversation,
     getConversations,

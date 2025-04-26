@@ -14,23 +14,27 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useDatabase } from "@/app/contexts/DatabaseContext";
 import { toast } from "sonner";
-import { 
-  Edit,
-} from "lucide-react";
 import { WeiDB } from "@/app/types/database";
 import EditProfileDrawer from "./EditProfileDrawer";
 import { MAX_FILE_SIZE } from "@/lib/config";
 
 interface Activity {
-  id: number;
+  id: string;
   action: string;
   target: string;
   date: string;
   points: number;
 }
 
+interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  earned: boolean;
+}
+
 export default function ProfileDashboard() {
-  const { userPoints, getCompletions, getHabits, getUserProfile, saveUserProfile } = useDatabase();
+  const { userPoints, getCompletions, getHabits, getUserProfile, saveUserProfile, getRewardRedemptions, getUserData, getRewards } = useDatabase();
   const [activeTab, setActiveTab] = useState("overview");
   const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
   const [profileData, setProfileData] = useState<WeiDB['userProfile']['value']>({
@@ -48,14 +52,7 @@ export default function ProfileDashboard() {
   const [streak, setStreak] = useState(0);
   const [completionRate, setCompletionRate] = useState("0%");
   const [recentActivities, setRecentActivities] = useState<Activity[]>([]);
-  
-  // Achievements data
-  const achievements = [
-    { id: 1, name: "First Step", description: "Complete your first habit", earned: true },
-    { id: 2, name: "Week Warrior", description: "7 day streak", earned: true },
-    { id: 3, name: "Early Bird", description: "Complete a habit before 8am", earned: false },
-    { id: 4, name: "Night Owl", description: "Complete a habit after 10pm", earned: false }
-  ];
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
   
   // Load user profile from IndexedDB
   useEffect(() => {
@@ -74,24 +71,76 @@ export default function ProfileDashboard() {
     loadUserProfile();
   }, [getUserProfile]);
   
+  // Load achievements - Define based on real user data
+  useEffect(() => {
+    const loadAchievements = async () => {
+      try {
+        const userData = await getUserData();
+        const completions = await getCompletions();
+        
+        // Define achievements based on real user data
+        const achievementsList: Achievement[] = [
+          { 
+            id: 'first_completion', 
+            name: "First Step", 
+            description: "Complete your first habit", 
+            earned: completions.length > 0 
+          },
+          { 
+            id: 'streak_7', 
+            name: "Week Warrior", 
+            description: "7 day streak", 
+            earned: (userData?.streakDays || 0) >= 7 
+          },
+          { 
+            id: 'early_bird', 
+            name: "Early Bird", 
+            description: "Complete a habit before 8am", 
+            earned: completions.some(completion => {
+              const completionTime = new Date(completion.completedAt);
+              return completionTime.getHours() < 8;
+            })
+          },
+          { 
+            id: 'night_owl', 
+            name: "Night Owl", 
+            description: "Complete a habit after 10pm", 
+            earned: completions.some(completion => {
+              const completionTime = new Date(completion.completedAt);
+              return completionTime.getHours() >= 22;
+            })
+          }
+        ];
+        
+        setAchievements(achievementsList);
+      } catch (error) {
+        console.error('Failed to load achievements:', error);
+      }
+    };
+    
+    loadAchievements();
+  }, [getUserData, getCompletions]);
+  
   // Load user stats
   useEffect(() => {
     const loadUserStats = async () => {
       try {
+        // Get user's real streak data and general stats
+        const userData = await getUserData();
+        if (userData) {
+          setStreak(userData.streakDays || 0);
+        }
+        
         // Get user's habit completions for the past week
         const today = new Date();
         const oneWeekAgo = new Date();
         oneWeekAgo.setDate(today.getDate() - 7);
         
-        // The getCompletions function expects dates
+        // Get habit completions and habits
         const recentCompletions = await getCompletions(undefined, today);
         const allHabits = await getHabits();
         
-        // Calculate streak (simplified logic - in a real app this would be more complex)
-        // For this example, we'll just use a random value between 1-30 days
-        setStreak(Math.floor(Math.random() * 30) + 1);
-        
-        // Calculate completion rate
+        // Calculate completion rate using real data
         const totalPossibleCompletions = allHabits.length * 7; // all habits over 7 days
         const actualCompletions = recentCompletions.length;
         const rate = totalPossibleCompletions > 0 
@@ -99,37 +148,50 @@ export default function ProfileDashboard() {
           : 0;
         setCompletionRate(`${rate}%`);
         
-        // Get recent activities
-        const recent: Activity[] = recentCompletions.slice(0, 5).map((completion, index) => {
+        // Get reward redemptions and rewards
+        const redemptions = await getRewardRedemptions();
+        const rewards = await getRewards();
+        
+        // Combine completions and redemptions into activities
+        const completionActivities = recentCompletions.map(completion => {
           const habit = allHabits.find(h => h.id === completion.habitId);
           return {
-            id: index + 1,
+            id: completion.id,
             action: "Completed",
             target: habit ? habit.name : "Unknown habit",
             date: new Date(completion.completedAt).toLocaleDateString(),
-            points: habit ? habit.points : 10
+            points: completion.points,
+            timestamp: new Date(completion.completedAt).getTime()
           };
         });
         
-        // Add a mock reward redemption
-        if (recent.length > 0) {
-          recent.splice(1, 0, {
-            id: recent.length + 1,
+        const redemptionActivities = redemptions.map((redemption: WeiDB['rewardRedemptions']['value']) => {
+          // Find the reward name
+          const reward = rewards.find(r => r.id === redemption.rewardId);
+          return {
+            id: redemption.id,
             action: "Redeemed",
-            target: "Coffee Break",
-            date: new Date().toLocaleDateString(),
-            points: -50
-          });
-        }
+            target: reward ? reward.name : "Reward", 
+            date: new Date(redemption.redeemedAt).toLocaleDateString(),
+            points: -redemption.cost,
+            timestamp: new Date(redemption.redeemedAt).getTime()
+          };
+        });
         
-        setRecentActivities(recent);
+        // Combine and sort activities by timestamp (newest first)
+        const combinedActivities = [...completionActivities, ...redemptionActivities]
+          .sort((a, b) => b.timestamp - a.timestamp)
+          .slice(0, 5) // Get only the 5 most recent
+          .map(({ id, action, target, date, points }) => ({ id, action, target, date, points }));
+        
+        setRecentActivities(combinedActivities);
       } catch (error) {
         console.error("Failed to load user stats:", error);
       }
     };
     
     loadUserStats();
-  }, [getCompletions, getHabits]);
+  }, [getCompletions, getHabits, getUserData, getRewardRedemptions, getRewards]);
   
   const handleEditProfile = () => {
     setIsEditDrawerOpen(true);

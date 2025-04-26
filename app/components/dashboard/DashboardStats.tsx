@@ -41,11 +41,11 @@ export default function DashboardStats() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <Card>
-        <CardHeader className="pb-2">
+      <Card className="py-4 gap-4">
+        <CardHeader className="pb-0 px-4">
           <CardTitle className="text-sm font-medium text-muted-foreground">Today's Progress</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4">
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
               <span className="text-2xl font-bold">{stats.completedToday}/{stats.totalToday}</span>
@@ -55,45 +55,47 @@ export default function DashboardStats() {
           </div>
         </CardContent>
       </Card>
-      
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Current Streak</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col">
-              <span className="text-2xl font-bold">{stats.streak} days</span>
-              <span className="text-xs text-muted-foreground">Keep it up!</span>
+
+      <div className="grid grid-cols-2 gap-4">
+        <Card className="py-4 gap-4">
+          <CardHeader className="pb-0 px-4">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Current Streak</CardTitle>
+          </CardHeader>
+          <CardContent className="px-4">
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <span className="text-2xl font-bold">{stats.streak} days</span>
+                <span className="text-xs text-muted-foreground">Keep it up!</span>
+              </div>
+              <div className="flex space-x-1">
+                {[...Array(5)].map((_, i) => (
+                  <div 
+                    key={i} 
+                    className={`h-8 w-2 rounded-full ${
+                      i < stats.streak % 5 ? 'bg-primary' : 'bg-muted'
+                    }`} 
+                  />
+                ))}
+              </div>
             </div>
-            <div className="flex space-x-1">
-              {[...Array(5)].map((_, i) => (
-                <div 
-                  key={i} 
-                  className={`h-8 w-2 rounded-full ${
-                    i < stats.streak % 5 ? 'bg-primary' : 'bg-muted'
-                  }`} 
-                />
-              ))}
+          </CardContent>
+        </Card>
+        
+        <Card className="py-4 gap-4">
+          <CardHeader className="pb-0 px-4">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Weekly Overview</CardTitle>
+          </CardHeader>
+          <CardContent className="px-4">
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <span className="text-2xl font-bold">70%</span>
+                <span className="text-xs text-muted-foreground">Completion rate</span>
+              </div>
+              <BarChart className="h-10 w-10 text-muted-foreground" />
             </div>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium text-muted-foreground">Weekly Overview</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col">
-              <span className="text-2xl font-bold">70%</span>
-              <span className="text-xs text-muted-foreground">Completion rate</span>
-            </div>
-            <BarChart className="h-10 w-10 text-muted-foreground" />
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 } 

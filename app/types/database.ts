@@ -64,6 +64,7 @@ export interface WeiDB extends DBSchema {
         timestamp: Date;
       }[];
       createdAt: Date;
+      updatedAt?: Date;
     };
   };
   userProfile: {

@@ -1,8 +1,8 @@
 export const APP_NAME = "Wei";
 
-export const APP_TITLE = "Wei - AI Agentic Habit Tracker";
+export const APP_TITLE = "Wei - The AI Agents For Personal Growth";
 
-export const APP_DESCRIPTION = "A personalized AI agentic habit tracker that helps you build better habits.";
+export const APP_DESCRIPTION = "Wei is a personal growth ai voice assistant that helps you build better habits.";
 
 export const APP_URL = "https://yaps.gg";
 

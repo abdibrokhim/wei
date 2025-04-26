@@ -4,6 +4,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import LayoutClient from "./layout-client";
+import { APP_DESCRIPTION } from "@/lib/config";
+import { APP_TITLE } from "@/lib/config";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,8 +27,8 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: "Wei - AI Agentic Habit Tracker",
-  description: "A personalized AI agentic habit tracker that helps you build better habits",
+  title: APP_TITLE,
+  description: APP_DESCRIPTION,
 };
 
 export default function RootLayout({

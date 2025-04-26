@@ -104,7 +104,7 @@ const VoiceTranscriptOverlay: React.FC<VoiceTranscriptOverlayProps> = ({
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 bg-background/90 backdrop-blur-sm z-40 flex flex-col justify-center items-center px-2">
+    <div className="fixed inset-0 bg-background/90 backdrop-blur-xs z-40 flex flex-col justify-center items-center px-2">
       <div 
         ref={cardRef} 
         onClick={handleCardClick} 
@@ -122,7 +122,7 @@ const VoiceTranscriptOverlay: React.FC<VoiceTranscriptOverlayProps> = ({
         <Card className="w-full py-4">
           <CardHeader className="pb-0">
             <CardTitle className="text-center flex items-center justify-center gap-2">
-              <span>AI Voice Agent</span>
+              <span>Talk to Wei</span>
               {isConnecting && <span className="text-sm text-muted-foreground">(Connecting...)</span>}
             </CardTitle>
           </CardHeader>

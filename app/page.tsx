@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
+import Link from 'next/link';
 
 export default function HomePage() {
   return (
@@ -19,8 +20,12 @@ export default function HomePage() {
       </div>
 
       <div className="flex flex-row gap-6 w-full max-w-xs mx-auto justify-center">
-        <Button variant="default" size="lg">
-          Join Waitlist
+        <Button 
+          variant="default" 
+          size="lg">
+          <Link href="https://linkedin.com/in/abdibrokhim" target="_blank">
+            Join Waitlist
+          </Link>
         </Button>
       </div>
     </div>

@@ -2,11 +2,13 @@
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Providers } from "./providers";
+import { usePathname } from "next/navigation";
 
 export default function LayoutClient({ children }: { children: React.ReactNode }) {
   const isMobile = useIsMobile();
+  const pathname = usePathname();
 
-  if (!isMobile) {
+  if (!isMobile && pathname !== "/") {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center p-8">

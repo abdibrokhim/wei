@@ -8,8 +8,10 @@ import { DatabaseProvider } from "./contexts/DatabaseContext";
 import { UserCacheProvider } from "./contexts/UserCacheContext";
 import { ChatProvider } from "./contexts/ChatContext";
 import RealTimeStreamingMode from "./RealTimeStreamingMode";
+import { usePathname } from "next/navigation";
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
       <DatabaseProvider>
@@ -18,7 +20,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             <EventProvider>
               <TranscriptProvider>
                 {children}
-                <RealTimeStreamingMode />
+                {pathname !== "/" && <RealTimeStreamingMode />}
               </TranscriptProvider>
             </EventProvider>
           </ChatProvider>

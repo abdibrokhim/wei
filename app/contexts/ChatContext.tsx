@@ -136,9 +136,14 @@ export const ChatProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       // Add minimal context if no system message exists
       if (!hasSystemMessage && cache) {
+        // Create a more descriptive system message with basic user info
         const minimalContext: OpenAIMessage = {
           role: 'system',
-          content: `You are Wei, a helpful habit-building assistant. The user's name is ${cache.profile?.name || 'User'}.`
+          content: `You are Wei, a helpful habit-building assistant. 
+The user's name is ${cache.profile?.name || 'User'}.
+They currently have ${cache.points || 0} points and a streak of ${cache.streak || 0} days.
+They have ${cache.habits?.length || 0} active habits.
+Use getUserProfile, getUserStats, getUserHabits and other user data functions to get more details when needed.`
         };
         updatedMessages.unshift(minimalContext);
       }

@@ -7,4 +7,5 @@ export const allAgentSets: AllAgentConfigsType = {
   greeter,
 };
 
-export const defaultAgentSetKey = "greeter";
+// Set wellbeing as the default agent set since it contains our user data agent
+export const defaultAgentSetKey = "wellbeing";

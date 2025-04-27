@@ -5,7 +5,7 @@ import Link from 'next/link';
 export default function HomePage() {
   return (
     <div className="w-full h-screen mx-auto bg-black flex flex-col items-center justify-center px-4 gap-8">
-      <h1 className="text-white text-xl md:text-4xl font-bold text-center">
+      <h1 className="text-white text-xl md:text-3xl font-bold text-center">
         The AI Agents For Personal Growth
       </h1>
       
@@ -19,10 +19,13 @@ export default function HomePage() {
         />
       </div>
 
+      <p className="text-white text-sm md:text-lg text-center italic">hey, i'm Wei - “helping you form good habits...”</p>
+
       <div className="flex flex-row gap-6 w-full max-w-xs mx-auto justify-center">
         <Button 
           variant="default" 
-          size="lg">
+          size="lg"
+        >
           <Link href="https://linkedin.com/in/abdibrokhim" target="_blank">
             Join Waitlist
           </Link>

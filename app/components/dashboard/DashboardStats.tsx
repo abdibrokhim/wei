@@ -9,7 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { BarChart } from "lucide-react";
 
 export default function DashboardStats() {
-  const { getCompletions, getHabits } = useDatabase();
+  const { getCompletions, getHabits, getUserData } = useDatabase();
   const [stats, setStats] = useState({
     completedToday: 0,
     totalToday: 0,
@@ -20,6 +20,7 @@ export default function DashboardStats() {
   useEffect(() => {
     const loadStats = async () => {
       const habits = await getHabits();
+      const userData = await getUserData();
       const completionsToday = await getCompletions(undefined, new Date());
       
       const totalHabits = habits.length;
@@ -31,7 +32,7 @@ export default function DashboardStats() {
       setStats({
         completedToday: completedHabits,
         totalToday: totalHabits,
-        streak: 3, // Mock value for now
+        streak: userData?.streakDays || 0,
         progress,
       });
     };
@@ -88,7 +89,7 @@ export default function DashboardStats() {
           <CardContent className="px-4">
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
-                <span className="text-2xl font-bold">70%</span>
+                <span className="text-2xl font-bold">7%</span>
                 <span className="text-xs text-muted-foreground">Completion rate</span>
               </div>
               <BarChart className="h-10 w-10 text-muted-foreground" />

@@ -282,152 +282,147 @@ async function handleToolCalls(toolCalls: any, userCache: any) {
 
 // Central handler for all database functions with user cache
 async function handleDatabaseFunction(name: string, args: any, userCache: any) {
-  if (!userCache) {
-    return JSON.stringify({ 
-      error: "User data not available",
-      message: "Please try refreshing the page to load your latest data." 
-    });
-  }
-
   switch (name) {
     case "getUserProfile":
-      const { fields = [] } = args;
-      
-      if (fields.length === 0) {
-        return JSON.stringify(userCache.profile);
-      }
-      
-      const filteredProfile: Record<string, any> = {};
-      fields.forEach((field: string) => {
-        if (field in userCache.profile) {
-          filteredProfile[field] = userCache.profile[field];
+      // Return the user profile with optional field filtering
+      if (args.fields && Array.isArray(args.fields) && args.fields.length > 0) {
+        const filteredProfile: Record<string, any> = {};
+        for (const field of args.fields) {
+          if (userCache.profile && userCache.profile[field] !== undefined) {
+            filteredProfile[field] = userCache.profile[field];
+          }
         }
-      });
-      
-      return JSON.stringify(filteredProfile);
-    
+        return JSON.stringify(filteredProfile);
+      }
+      // Return the complete profile if no fields specified
+      return JSON.stringify(userCache.profile || { name: "Unknown User" });
+
     case "getUserHabits":
-      return JSON.stringify({ habits: userCache.habits });
-    
-    case "getHabitCompletions":
-      const { daysAgo = 30 } = args;
-      
-      if (daysAgo === 30) {
-        // If the default value is used, just return the cached completions
-        return JSON.stringify({ completions: userCache.completions });
-      }
-      
-      // Otherwise filter by the requested days
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - daysAgo);
-      
-      const filteredCompletions = userCache.completions.filter(
-        (completion: any) => new Date(completion.completedAt) >= startDate
-      );
-      
-      return JSON.stringify({ completions: filteredCompletions });
-    
-    case "getUserStats":
-      return JSON.stringify({
-        points: userCache.points,
-        streakDays: userCache.streak
-      });
-    
-    case "getUserRewards":
-      return JSON.stringify({ rewards: userCache.rewards });
-    
-    case "getRewardRedemptions":
-      const daysAgo2 = args.daysAgo || 30;
-      
-      if (daysAgo2 === 30) {
-        // If the default value is used, just return the cached redemptions
-        return JSON.stringify({ redemptions: userCache.redemptions });
-      }
-      
-      // Otherwise filter by the requested days
-      const startDate2 = new Date();
-      startDate2.setDate(startDate2.getDate() - daysAgo2);
-      
-      const filteredRedemptions = userCache.redemptions.filter(
-        (redemption: any) => new Date(redemption.redeemedAt) >= startDate2
-      );
-      
-      return JSON.stringify({ redemptions: filteredRedemptions });
-    
-    case "completeHabit":
-      if (!args.habitId) {
-        return JSON.stringify({ error: "habitId is required" });
-      }
-      return JSON.stringify({
-        message: "To complete this habit, the user needs to use the client-side interface. Please instruct them to click the complete button for this habit in the habits tab.",
-        habitId: args.habitId
-      });
-    
-    case "redeemReward":
-      if (!args.rewardId) {
-        return JSON.stringify({ error: "rewardId is required" });
-      }
-      return JSON.stringify({
-        message: "To redeem this reward, the user needs to use the client-side interface. Please instruct them to click the redeem button for this reward in the rewards tab.",
-        rewardId: args.rewardId
-      });
-    
-    case "calculateBonusPoints":
-      if (!args.habitId || !args.basePoints) {
-        return JSON.stringify({ 
-          error: "Both habitId and basePoints are required" 
-        });
-      }
-      
-      try {
-        // Filter completions for this habit
-        const habitCompletions = userCache.completions.filter(
-          (completion: any) => completion.habitId === args.habitId
-        );
-        
-        // Calculate chain bonus (consecutive days)
-        let chainBonus = 0;
-        if (habitCompletions.length > 0) {
-          chainBonus = Math.min(3, Math.floor(habitCompletions.length / 2));
-        }
-        
-        // Calculate streak bonus
-        const streakBonus = Math.min(5, Math.floor(userCache.streak / 3));
-        
-        // Calculate consistency bonus
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const lastWeekCompletions = userCache.completions.filter((completion: any) => {
-          const completionDate = new Date(completion.completedAt);
-          const daysDiff = Math.floor((today.getTime() - completionDate.getTime()) / (1000 * 60 * 60 * 24));
-          return daysDiff < 7;
-        });
-        
-        const consistencyBonus = Math.min(2, Math.floor(lastWeekCompletions.length / 3));
-        
-        // Calculate total
-        const totalBonus = chainBonus + streakBonus + consistencyBonus;
-        const totalPoints = args.basePoints + totalBonus;
-        
+      // Filter habits by category if specified
+      if (args.category && userCache.habits) {
+        const filteredHabits = userCache.habits.filter((habit: any) => habit.category === args.category);
         return JSON.stringify({
-          basePoints: args.basePoints,
-          chainBonus,
-          streakBonus,
-          consistencyBonus,
-          totalBonus,
-          totalPoints,
-          explanation: `${args.basePoints} base + ${chainBonus} chain + ${streakBonus} streak + ${consistencyBonus} consistency = ${totalPoints} total`
-        });
-      } catch (error) {
-        console.error("Error calculating bonus points:", error);
-        return JSON.stringify({ 
-          error: "Failed to calculate bonus points",
-          basePoints: args.basePoints,
-          totalPoints: args.basePoints // Fall back to base points only
+          habits: filteredHabits,
+          count: filteredHabits.length
         });
       }
-    
+      // Return all habits if no category filter
+      return JSON.stringify({
+        habits: userCache.habits || [],
+        count: (userCache.habits || []).length
+      });
+
+    case "getHabitCompletions":
+      // Get completions from the past X days
+      const daysAgo = args.daysAgo || 30;
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - daysAgo);
+      
+      // Filter completions by date
+      const filteredCompletions = userCache.completions
+        ? userCache.completions.filter(
+            (completion: any) => new Date(completion.completedAt) >= cutoffDate
+          )
+        : [];
+      
+      return JSON.stringify({
+        completions: filteredCompletions,
+        count: filteredCompletions.length
+      });
+
+    case "getUserStats":
+      // Return points and streak
+      return JSON.stringify({
+        points: userCache.points || 0,
+        streak: userCache.streak || 0
+      });
+
+    case "getUserRewards":
+      // Return all rewards
+      return JSON.stringify({
+        rewards: userCache.rewards || [],
+        count: (userCache.rewards || []).length
+      });
+
+    case "getRewardRedemptions":
+      // Get redemptions from the past X days
+      const redemptionDaysAgo = args.daysAgo || 30;
+      const redemptionCutoffDate = new Date();
+      redemptionCutoffDate.setDate(redemptionCutoffDate.getDate() - redemptionDaysAgo);
+      
+      // Filter redemptions by date
+      const filteredRedemptions = userCache.redemptions
+        ? userCache.redemptions.filter(
+            (redemption: any) => new Date(redemption.redeemedAt) >= redemptionCutoffDate
+          )
+        : [];
+      
+      return JSON.stringify({
+        redemptions: filteredRedemptions,
+        count: filteredRedemptions.length
+      });
+
+    case "getRecentActivity":
+      // Get recent activity with optional filtering
+      let activities = userCache.recentActivity || [];
+      const limit = args.limit || 5;
+      
+      // Filter by activity type if provided
+      if (args.activityType) {
+        activities = activities.filter((activity: any) => activity.action === args.activityType);
+      }
+      
+      return JSON.stringify({
+        activities: activities.slice(0, limit),
+        count: activities.length
+      });
+
+    case "completeHabit":
+      // This would normally update the database, but in this context
+      // we're just returning a success message since we can't modify the DB from here
+      return JSON.stringify({
+        success: true,
+        message: "Habit marked as complete (simulation only, database not updated)"
+      });
+
+    case "redeemReward":
+      // This would normally update the database, but in this context
+      // we're just returning a success message since we can't modify the DB from here
+      return JSON.stringify({
+        success: true,
+        message: "Reward redeemed (simulation only, database not updated)"
+      });
+
+    case "calculateBonusPoints":
+      // Get the habit from cache
+      const habit = userCache.habits
+        ? userCache.habits.find((h: any) => h.id === args.habitId)
+        : null;
+      
+      if (!habit) {
+        return JSON.stringify({
+          error: "Habit not found",
+          bonusPoints: 0
+        });
+      }
+      
+      // Calculate a simple bonus based on streak
+      const streakBonus = Math.min(50, Math.floor(userCache.streak / 2));
+      const difficultyBonus = habit.difficulty ? (habit.difficulty * 5) : 0;
+      const totalBonus = streakBonus + difficultyBonus;
+      
+      return JSON.stringify({
+        basePoints: args.basePoints,
+        streakBonus,
+        difficultyBonus, 
+        totalBonus,
+        totalPoints: args.basePoints + totalBonus
+      });
+
     default:
-      return JSON.stringify({ error: `Function ${name} not implemented` });
+      return JSON.stringify({
+        error: `Unknown function: ${name}`,
+        message: "This function is not supported."
+      });
   }
 }

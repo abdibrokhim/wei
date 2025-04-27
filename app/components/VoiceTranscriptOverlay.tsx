@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { X } from "@phosphor-icons/react/dist/ssr";
 import { SessionStatus } from "@/app/types";
 import BottomToolbar from "./BottomToolbar";
+import { Markdown } from "@/components/prompt-kit/markdown";
 
 interface VoiceTranscriptOverlayProps {
   isVisible: boolean;
@@ -153,7 +154,9 @@ const VoiceTranscriptOverlay: React.FC<VoiceTranscriptOverlayProps> = ({
                           ? "bg-primary text-primary-foreground" 
                           : "bg-muted"
                       }`}>
-                        <p className="text-base">{item.title}</p>
+                        <div className="text-sm break-words">
+                          <Markdown>{item.title!}</Markdown>
+                        </div>
                       </div>
                     </div>
                   ))

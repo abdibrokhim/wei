@@ -104,6 +104,13 @@ try Wei on your own!
 >
 > An essential part of contributing involves not only submitting new features with accompanying tests (and, ideally, examples) but also ensuring that these contributions pass our automated pytest suite. This approach helps us maintain the project's quality and reliability by verifying compatibility and functionality.
 
+### Contributors ✨
+
+<a href="https://github.com/abdibrokhim/wei/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=abdibrokhim/wei" />
+</a>
+
+
 ## 📬 Community & Contact
 
 If you're keen on exploring new research opportunities or discoveries with our platform and wish to dive deeper or suggest new features, we're here to talk. Feel free to get in touch for more details at abdibrokhim@gmail.com.
@@ -115,6 +122,8 @@ If you're keen on exploring new research opportunities or discoveries with our p
 ## 🌟 Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=abdibrokhim/wei&type=Date)](https://star-history.com/#abdibrokhim/wei&Date)
+
+> *⭐ If you find Wei interesting, consider starring this repo to help spread the word.*
 
 ## 🙌 Acknowledgment
 

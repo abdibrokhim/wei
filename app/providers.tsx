@@ -10,6 +10,7 @@ import { ChatProvider } from "./contexts/ChatContext";
 import RealTimeStreamingMode from "./RealTimeStreamingMode";
 import { usePathname } from "next/navigation";
 import { DBLoader } from "./components/DBLoader";
+import WhatsNewInfo from "./components/updates/WhatsNewInfo";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -21,6 +22,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             <ChatProvider>
               <EventProvider>
                 <TranscriptProvider>
+                  {pathname !== "/" && <WhatsNewInfo />}
                   {children}
                   {pathname !== "/" && <RealTimeStreamingMode />}
                 </TranscriptProvider>

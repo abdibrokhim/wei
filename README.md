@@ -55,7 +55,8 @@
 
 ![Wei Features](./public/assets/voice-mode.png)
 
-interesting...
+try Wei on your own!
+
 <table>
   <tr>
     <td><img src="./public/assets/steps-1.png" alt="Wei Features"></td>

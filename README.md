@@ -55,11 +55,17 @@
 
 ![Wei Features](./public/assets/voice-mode.png)
 
-![Wei Features](./public/assets/steps-1.png)
-
-![Wei Features](./public/assets/steps-2.png)
-
-![Wei Features](./public/assets/steps-3.png)
+interesting...
+<table>
+  <tr>
+    <td><img src="./public/assets/steps-1.png" alt="Wei Features"></td>
+    <td><img src="./public/assets/steps-2.png" alt="Wei Features"></td>
+  </tr>
+  <tr>
+    <td><img src="./public/assets/steps-3.png" alt="Wei Features"></td>
+    <td><img src="./public/assets/wei-uiux.png" alt="Wei Features"></td>
+  </tr>
+</table>
 
 
 <br>

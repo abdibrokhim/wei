@@ -9,22 +9,25 @@ import { UserCacheProvider } from "./contexts/UserCacheContext";
 import { ChatProvider } from "./contexts/ChatContext";
 import RealTimeStreamingMode from "./RealTimeStreamingMode";
 import { usePathname } from "next/navigation";
+import { DBLoader } from "./components/DBLoader";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
       <DatabaseProvider>
-        <UserCacheProvider>
-          <ChatProvider>
-            <EventProvider>
-              <TranscriptProvider>
-                {children}
-                {pathname !== "/" && <RealTimeStreamingMode />}
-              </TranscriptProvider>
-            </EventProvider>
-          </ChatProvider>
-        </UserCacheProvider>
+        <DBLoader>
+          <UserCacheProvider>
+            <ChatProvider>
+              <EventProvider>
+                <TranscriptProvider>
+                  {children}
+                  {pathname !== "/" && <RealTimeStreamingMode />}
+                </TranscriptProvider>
+              </EventProvider>
+            </ChatProvider>
+          </UserCacheProvider>
+        </DBLoader>
       </DatabaseProvider>
     </ThemeProvider>
   );

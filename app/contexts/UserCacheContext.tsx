@@ -1,8 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { openDB } from 'idb';
 import { WeiDB } from '../types/database';
+import { useDatabase } from './DatabaseContext';
 
 export interface UserCache {
   profile: any;
@@ -34,15 +34,19 @@ export const useUserCache = () => {
 };
 
 export const UserCacheProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { db, isLoading: dbLoading } = useDatabase();
   const [cache, setCache] = useState<UserCache | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
   const fetchUserData = async () => {
+    if (!db) {
+      console.warn('UserCacheProvider: Database not available yet');
+      return;
+    }
+    
     setIsLoading(true);
     try {
-      const db = await openDB<WeiDB>('wei-database', 2);
-      
       // Get user profile
       const profile = await db.get('userProfile', 'default');
       
@@ -91,7 +95,6 @@ export const UserCacheProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       };
       
       setCache(newCache);
-      db.close();
     } catch (err) {
       console.error('Failed to fetch user data for cache:', err);
       setError(err instanceof Error ? err : new Error('Unknown error fetching user data'));
@@ -183,15 +186,17 @@ export const UserCacheProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     });
   }
 
-  // Initialize cache when component mounts
+  // Initialize cache when database is available
   useEffect(() => {
-    fetchUserData();
-    
-    // Refresh cache every 5 minutes
-    const intervalId = setInterval(fetchUserData, 5 * 60 * 1000);
-    
-    return () => clearInterval(intervalId);
-  }, []);
+    if (db && !dbLoading) {
+      fetchUserData();
+      
+      // Refresh cache every 5 minutes
+      const intervalId = setInterval(fetchUserData, 5 * 60 * 1000);
+      
+      return () => clearInterval(intervalId);
+    }
+  }, [db, dbLoading]);
 
   const refreshCache = async () => {
     await fetchUserData();

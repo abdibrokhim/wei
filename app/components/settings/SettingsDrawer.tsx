@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/card"
 import { playNotificationSound } from "@/lib/audio"
 import { toast } from "sonner"
+import { APP_VERSION } from "@/lib/config"
 
 interface SettingsDrawerProps {
   isOpen: boolean;
@@ -189,7 +190,7 @@ export default function SettingsDrawer({
             </Card>
             
             <div className="text-center text-xs text-muted-foreground mt-4">
-              <p>App Version 1.0.0</p>
+              <p>App Version ${APP_VERSION}</p>
             </div>
           </div>
         </div>

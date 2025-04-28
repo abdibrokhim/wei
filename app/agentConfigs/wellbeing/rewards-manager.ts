@@ -1,5 +1,7 @@
 import { AgentConfig } from "@/app/types";
 import { getUserStats, getUserRewards, getRewardRedemptions } from "@/app/utils/agentDatabaseTools";
+import { DATABASE_NAME } from "@/lib/config";
+import { DATABASE_VERSION } from "@/lib/config";
 import { openDB } from "idb";
 
 const rewardsManager: AgentConfig = {
@@ -142,7 +144,7 @@ Always check the user has enough points before confirming a redemption.
       try {
         // We need to use the database context directly since redeemReward isn't exported
         // First get the database from the context
-        const db = await openDB('wei-database', 2);
+        const db = await openDB(DATABASE_NAME, DATABASE_VERSION);
         
         // Get the reward details
         const reward = await db.get('rewards', rewardId);

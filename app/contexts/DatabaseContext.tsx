@@ -1,9 +1,10 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { openDB, IDBPDatabase } from 'idb';
+import { IDBPDatabase } from 'idb';
 import { WeiDB } from '../types/database';
 import { seedDatabase } from '../utils/seedData';
+import { initDB } from '@/lib/db';
 
 interface DatabaseContextType {
   db: IDBPDatabase<WeiDB> | null;
@@ -43,61 +44,24 @@ export const DatabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [userPoints, setUserPointsState] = useState<number>(0);
 
   useEffect(() => {
-    const initDB = async () => {
+    const setupDB = async () => {
       try {
-        const database = await openDB<WeiDB>('wei-database', 2, {
-          upgrade(db, oldVersion, newVersion) {
-            // Create object stores if they don't exist
-            if (oldVersion < 1) {
-              const habitStore = db.createObjectStore('habits', { keyPath: 'id' });
-              habitStore.createIndex('by-category', 'category');
-              
-              const completionsStore = db.createObjectStore('completions', { keyPath: 'id' });
-              completionsStore.createIndex('by-habit', 'habitId');
-              completionsStore.createIndex('by-date', 'completedAt');
-              
-              db.createObjectStore('rewards', { keyPath: 'id' });
-              db.createObjectStore('rewardRedemptions', { keyPath: 'id' });
-              const userStore = db.createObjectStore('user', { keyPath: 'id' });
-              db.createObjectStore('conversations', { keyPath: 'id' });
-              
-              // Add default user
-              userStore.add({
-                id: 'default',
-                name: 'User',
-                points: 0,
-                streakDays: 0,
-                lastActive: new Date()
-              });
-            }
-            
-            // Add userProfile store in version 2
-            if (oldVersion < 2 && !db.objectStoreNames.contains('userProfile')) {
-              const userProfileStore = db.createObjectStore('userProfile', { keyPath: 'id' });
-              
-              // Add default profile
-              userProfileStore.add({
-                id: 'default',
-                name: 'User',
-                email: 'user@example.com',
-                bio: 'No bio yet',
-                avatarUrl: '',
-                joinDate: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-              });
-            }
-          }
-        });
-        
+        const database = await initDB();
         setDB(database);
         
         // Load initial user points
-        const userData = await database.get('user', 'default');
-        if (userData) {
-          setUserPointsState(userData.points);
+        try {
+          const userData = await database.get('user', 'default');
+          if (userData) {
+            setUserPointsState(userData.points);
+          }
+          
+          // Seed database with sample data
+          await seedDatabase(database);
+        } catch (dataError) {
+          console.error('Error getting initial data from database:', dataError);
+          // Continue even with this error - we just might not have initial data
         }
-        
-        // Seed database with sample data
-        await seedDatabase(database);
         
         setIsLoading(false);
       } catch (err) {
@@ -107,13 +71,10 @@ export const DatabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       }
     };
 
-    initDB();
+    setupDB();
     
-    return () => {
-      if (db) {
-        db.close();
-      }
-    };
+    // Do NOT close the connection when unmounting
+    // The connection will be shared across providers
   }, []);
 
   const setUserPoints = async (points: number) => {

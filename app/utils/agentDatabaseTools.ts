@@ -1,15 +1,22 @@
-import { openDB } from 'idb';
+import { IDBPDatabase } from 'idb';
 import { WeiDB } from '../types/database';
 import { Activity } from '../types';
+import { initDB } from '@/lib/db';
 
 /**
  * Provides utility functions to access database information for AI agents
  */
 
-// Open the database 
+// Database cache to avoid reopening connections
+let dbInstance: IDBPDatabase<WeiDB> | null = null;
+
+// Get the database (reuse the existing connection if possible)
 async function getDatabase() {
   try {
-    return await openDB<WeiDB>('wei-database', 2);
+    if (!dbInstance) {
+      dbInstance = await initDB();
+    }
+    return dbInstance;
   } catch (error) {
     console.error('Failed to open database for agent:', error);
     throw new Error('Database access failed');
@@ -46,8 +53,6 @@ export async function getUserProfile(fields?: string[]) {
   } catch (error) {
     console.error('Failed to get user profile:', error);
     return null;
-  } finally {
-    db.close();
   }
 }
 
@@ -62,8 +67,6 @@ export async function getUserHabits() {
   } catch (error) {
     console.error('Failed to get user habits:', error);
     return [];
-  } finally {
-    db.close();
   }
 }
 
@@ -85,8 +88,6 @@ export async function getHabitCompletions(daysAgo = 30) {
   } catch (error) {
     console.error('Failed to get habit completions:', error);
     return [];
-  } finally {
-    db.close();
   }
 }
 
@@ -101,8 +102,6 @@ export async function getUserRewards() {
   } catch (error) {
     console.error('Failed to get user rewards:', error);
     return [];
-  } finally {
-    db.close();
   }
 }
 
@@ -124,8 +123,6 @@ export async function getRewardRedemptions(daysAgo = 30) {
   } catch (error) {
     console.error('Failed to get reward redemptions:', error);
     return [];
-  } finally {
-    db.close();
   }
 }
 
@@ -140,8 +137,6 @@ export async function getUserStats() {
   } catch (error) {
     console.error('Failed to get user stats:', error);
     return { points: 0, streakDays: 0 };
-  } finally {
-    db.close();
   }
 }
 
@@ -181,8 +176,6 @@ export async function completeHabit(habitId: string) {
   } catch (error) {
     console.error('Failed to complete habit:', error);
     return { success: false, message: 'Failed to complete habit' };
-  } finally {
-    db.close();
   }
 }
 
@@ -196,7 +189,6 @@ export async function getUserDataForAgent() {
     // Fetch user profile data
     const user = await db.get('userProfile', 'default');
     if (!user) {
-      db.close();
       return { error: "User profile not found" };
     }
 
@@ -228,8 +220,6 @@ export async function getUserDataForAgent() {
     
     // Format recent activities
     const recentActivity = formatRecentActivity(habits, completions, rewards, redemptions);
-    
-    db.close();
     
     return {
       profile: user,

@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
+import { CaretRight, GithubLogo } from '@phosphor-icons/react/dist/ssr';
 
 export default function HomePage() {
   return (
@@ -14,7 +15,6 @@ export default function HomePage() {
           src="/wei-square.png" 
           alt="logo" 
           fill
-          priority
           className="object-contain"
         />
       </div>
@@ -23,11 +23,21 @@ export default function HomePage() {
 
       <div className="flex flex-row gap-6 w-full max-w-xs mx-auto justify-center">
         <Button 
+          variant="outline" 
+          size="lg"
+        >
+          <Link href="https://github.com/abdibrokhim/wei" target="_blank" className='flex flex-row gap-1 items-center'>
+            <GithubLogo className="size-4" />
+            <span>Open Source</span>
+          </Link>
+        </Button>
+        <Button 
           variant="default" 
           size="lg"
         >
-          <Link href="https://linkedin.com/in/abdibrokhim" target="_blank">
-            Join Waitlist
+          <Link href="/dashboard" className='flex flex-row gap-1 items-center'>
+            <span>Try Now</span>
+            <CaretRight className="size-4" />
           </Link>
         </Button>
       </div>

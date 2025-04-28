@@ -27,7 +27,10 @@ export default function DashboardHeader() {
       <CardContent className="py-2 px-4 relative">
         <div className="flex items-center">
           <div className="flex flex-row items-center gap-6">
-            <Avatar className="h-16 w-16 border-1 border-primary">
+            <Avatar 
+              className="h-16 w-16 border-1 border-primary cursor-pointer"
+              onClick={() => router.push("/")} // redirect to landing page
+            >
               <AvatarImage src="/wei-icon.png" alt="Wei Icon" />
               <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-pink-500 to-rose-500 text-white">
                 WEI

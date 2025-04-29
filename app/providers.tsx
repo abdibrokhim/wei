@@ -11,6 +11,7 @@ import RealTimeStreamingMode from "./RealTimeStreamingMode";
 import { usePathname } from "next/navigation";
 import { DBLoader } from "./components/DBLoader";
 import WhatsNewInfo from "./components/updates/WhatsNewInfo";
+import { FeedbackWidget } from "./components/feedback-widget";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -25,6 +26,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
                   {pathname !== "/" && <WhatsNewInfo />}
                   {children}
                   {pathname !== "/" && <RealTimeStreamingMode />}
+                  {pathname === "/" && <FeedbackWidget />}
                 </TranscriptProvider>
               </EventProvider>
             </ChatProvider>

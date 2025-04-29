@@ -7,6 +7,7 @@ just to make sure i was not sleeping all the time.
 
 - added an experimental feature; theme comparison component to the home page.
 ps: just drag the slider to see the magic.
+- added a feedback widget to the home page.
 
 
 ## v0.2.0

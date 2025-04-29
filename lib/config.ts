@@ -10,7 +10,7 @@ export const SUBSCRIPTION_URL = "https://www.patreon.com/abdibrokhim/membership"
 
 export const EMAIL = "abdibrokhim@gmail.com";
 
-export const APP_VERSION = "0.2.0"; // Current app version
+export const APP_VERSION = "0.2.1"; // Current app version
 
 export const DAILY_FILE_UPLOAD_LIMIT = 5;
 

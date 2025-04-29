@@ -10,6 +10,14 @@ export type ChangelogItem = {
 // Changelog entries from newest to oldest
 export const changelogData: ChangelogItem[] = [
   {
+    version: "0.2.1",
+    releaseDate: "30th April 2025",
+    changes: [
+      "Added a feedback widget to the home page",
+      "Added an experimental feature; theme comparison. affects only the home page."
+    ]
+  },
+  {
     version: "0.2.0",
     releaseDate: "28th April 2025",
     changes: [

@@ -15,7 +15,7 @@ import WhatsNewInfo from "./components/updates/WhatsNewInfo";
 export function Providers({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   return (
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem forcedTheme={pathname === "/" ? undefined : "dark"}>
       <DatabaseProvider>
         <DBLoader>
           <UserCacheProvider>

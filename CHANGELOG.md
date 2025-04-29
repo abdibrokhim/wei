@@ -3,6 +3,12 @@
 just to make sure i was not sleeping all the time.
 
 
+## v0.2.1
+
+- added an experimental feature; theme comparison component to the home page.
+ps: just drag the slider to see the magic.
+
+
 ## v0.2.0
 
 - Created a centralized database initialization in `[lib/db.ts](./lib/db.ts)` that handles all object store creation

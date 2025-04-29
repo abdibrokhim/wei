@@ -76,6 +76,8 @@
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.705 0.015 286.067);
+  --theme-clip-path: polygon(0% 0%, 50% 0%, 50% 100%, 0% 100%);
+  --divider-position: 50%;
 }
 
 .dark {
@@ -127,4 +129,76 @@
   .dark ::selection {
     @apply bg-primary text-primary-foreground;
   }
+}
+
+/* Theme Comparison Feature */
+:root {
+  --theme-clip-path: polygon(0% 0%, 50% 0%, 50% 100%, 0% 100%);
+  --divider-position: 50%;
+}
+
+/* Theme comparison transitions */
+.theme-transition * {
+  transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Animation for theme tip */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+/* Light theme section styling */
+.light-theme-section {
+  color-scheme: light !important;
+}
+
+/* Apply proper theme styling to all elements */
+.light-theme-section .text-foreground,
+.light-theme-section [class*="text-"] {
+  color: var(--foreground) !important;
+}
+
+.light-theme-section .bg-background,
+.light-theme-section [class*="bg-"] {
+  background-color: var(--background) !important;
+}
+
+.light-theme-section .border-border,
+.light-theme-section [class*="border-"] {
+  border-color: var(--border) !important;
+}
+
+/* Handle gradient text correctly in both themes */
+.light-theme-section [class*="bg-[linear-gradient"] {
+  background: linear-gradient(to right, #000 33.3333%, #000 33.3333%, #fff 33.3333%) !important;
+}
+
+.light-theme-section .bg-clip-text.text-transparent {
+  background: linear-gradient(to right, #000 33.3333%, #000 33.3333%, #fff 33.3333%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+}
+
+/* Add subtle animation to divider */
+.theme-divider::after {
+  content: '';
+  position: absolute;
+  left: var(--divider-position, 50%);
+  top: 0;
+  height: 100%;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+  transform: translateX(-50%);
 }

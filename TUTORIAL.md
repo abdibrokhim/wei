@@ -1,4 +1,14 @@
-# [Tutorial]: 🌱 Wei: The AI Agents For Personal Growth
+# How To Build End-To-End AI Voice Agentic App Using AI/ML API and OpenAI Realtime API
+
+## 🌱 Wei: The AI Agents For Personal Growth
+
+<div align="center">
+  <a href="https://www.wei.yaps.gg">
+    <img src="./public/assets/wei-agents-banner.png" alt=banner>
+  </a>
+</div>
+
+</br>
 
 Recently I participated in a LocalDown hackathon. 
 I built Wei, an AI agent that helps you build good habits. 
@@ -9,6 +19,12 @@ I won 3rd place in the hackathon.
 Here's a comprehensive tutorial on how to build your own from very scratch.
 
 Let's get started.
+
+## Architecture
+
+<p align="left">
+  <img src='./public/assets/arch-full.png'>
+</p>
 
 
 ## Introduction
@@ -93,6 +109,16 @@ Wei can handle multiple agents at once.
 
 All AI Agents are able to transfer control to each other. 
 Call proper tools and execute them.
+
+> You can watch the demo video below.
+
+[![Introducing Wei: The AI Agents For Personal Growth](./public/assets/wei-youtube.png)](https://youtu.be/LoGBseW_iVY)
+
+or look into presentation slides below.
+
+[Introducing Wei: The AI Agents For Personal Growth](https://www.canva.com/design/DAGlvqFuJtI/Pm8Qn0YdCCXy35fRxL049g/edit)
+
+*continue shipping...*
 
 ### Custom made AI Agents SDK (from scratch)
 
@@ -1711,6 +1737,8 @@ npx shadcn@latest add "https://prompt-kit.com/c/[COMPONENT].json"
 ```
 
 ### Chat Interface
+
+![Wei Features](./public/assets/features.png)
 
 The chat interface is the main component that will handle the chat messages, input, and history.
 
@@ -3332,12 +3360,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
 ```
 
 
-
-
-
-
-
 ### Voice Chat
+
+![Wei Features](./public/assets/voice-mode.png)
 
 #### Handle Server Event (hook)
 
@@ -3962,8 +3987,470 @@ Here's a simple demonstration of more advanced, agentic patterns built on top of
 [openai-realtime-agents](https://github.com/openai/openai-realtime-agents)
 
 
-
 ## Integrating with AI/ML API and OpenAI Realtime API
+
+### AI Agents Configuration
+
+Dynamically load agents with user context.
+
+Create a new file `app/utils/agentLoader.ts`.
+
+```ts
+import { UserCache } from '@/app/contexts/UserCacheContext';
+import { injectUserContext } from '@/app/agentConfigs/utils';
+import { AgentConfig } from '@/app/types';
+
+/**
+ * Load and enhance an agent with user context
+ * @param agentName Name of the agent to load from the wellbeing directory
+ * @param userCache The user cache context data
+ * @returns Enhanced agent config with user context
+ */
+export async function loadAgentWithUserContext(
+  agentName: string,
+  userCache: UserCache | null
+): Promise<AgentConfig | null> {
+  try {
+    // Dynamically import the agent config
+    const agentModule = await import(`@/app/agentConfigs/wellbeing/${agentName}`);
+    
+    if (!agentModule.default) {
+      console.error(`Agent module ${agentName} has no default export`);
+      return null;
+    }
+    
+    // If we have user cache data, enhance the agent with it
+    if (userCache) {
+      return injectUserContext(agentModule.default, userCache);
+    }
+    
+    // Otherwise return the unmodified agent
+    return agentModule.default;
+  } catch (error) {
+    console.error(`Failed to load agent: ${agentName}`, error);
+    return null;
+  }
+}
+
+/**
+ * Load multiple agents with user context
+ * @param userCache The user cache context data
+ * @returns Object containing all enhanced agents with user context
+ */
+export async function loadAllAgentsWithUserContext(
+  userCache: UserCache | null
+): Promise<Record<string, AgentConfig>> {
+  try {
+    // Import the agents index
+    const { default: agents } = await import('@/app/agentConfigs/wellbeing/index');
+    
+    // Create a result object
+    const enhancedAgents: Record<string, AgentConfig> = {};
+    
+    // Enhance each agent with user context
+    for (const agent of agents) {
+      if (userCache) {
+        enhancedAgents[agent.name] = injectUserContext(agent, userCache);
+      } else {
+        enhancedAgents[agent.name] = agent;
+      }
+    }
+    
+    return enhancedAgents;
+  } catch (error) {
+    console.error('Failed to load all agents', error);
+    return {};
+  }
+} 
+```
+
+### Agent Database Tools
+
+Provides utility functions to access database information for AI agents.
+
+Create a new file `app/utils/agentDatabaseTools.ts`.
+
+```ts
+import { IDBPDatabase } from 'idb';
+import { WeiDB } from '../types/database';
+import { initDB } from '@/lib/db';
+
+/**
+ * Provides utility functions to access database information for AI agents
+ */
+
+// Database cache to avoid reopening connections
+let dbInstance: IDBPDatabase<WeiDB> | null = null;
+
+// Get the database (reuse the existing connection if possible)
+async function getDatabase() {
+  try {
+    if (!dbInstance) {
+      dbInstance = await initDB();
+    }
+    return dbInstance;
+  } catch (error) {
+    console.error('Failed to open database for agent:', error);
+    throw new Error('Database access failed');
+  }
+}
+
+/**
+ * Get user profile information
+ * @param fields Optional array of field names to retrieve
+ * @returns User profile data object
+ */
+export async function getUserProfile(fields?: string[]) {
+  const db = await getDatabase();
+  try {
+    const profile = await db.get('userProfile', 'default');
+    
+    if (!profile) {
+      return null;
+    }
+    
+    if (!fields || fields.length === 0) {
+      return profile;
+    }
+    
+    // Return only requested fields
+    const filteredProfile = {} as Record<string, any>;
+    fields.forEach(field => {
+      if (field in profile) {
+        filteredProfile[field] = profile[field as keyof typeof profile];
+      }
+    });
+    
+    return filteredProfile;
+  } catch (error) {
+    console.error('Failed to get user profile:', error);
+    return null;
+  }
+}
+
+/**
+ * Get user's habits
+ */
+export async function getUserHabits() {
+  const db = await getDatabase();
+  try {
+    const habits = await db.getAll('habits');
+    return habits || [];
+  } catch (error) {
+    console.error('Failed to get user habits:', error);
+    return [];
+  }
+}
+
+/**
+ * Get user's habit completions
+ */
+export async function getHabitCompletions(daysAgo = 30) {
+  const db = await getDatabase();
+  try {
+    const allCompletions = await db.getAll('completions');
+    
+    // Filter completions by date
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - daysAgo);
+    
+    return allCompletions.filter(completion => 
+      new Date(completion.completedAt) >= startDate
+    );
+  } catch (error) {
+    console.error('Failed to get habit completions:', error);
+    return [];
+  }
+}
+
+/**
+ * Get user's rewards
+ */
+export async function getUserRewards() {
+  const db = await getDatabase();
+  try {
+    const rewards = await db.getAll('rewards');
+    return rewards || [];
+  } catch (error) {
+    console.error('Failed to get user rewards:', error);
+    return [];
+  }
+}
+
+/**
+ * Get user's reward redemptions
+ */
+export async function getRewardRedemptions(daysAgo = 30) {
+  const db = await getDatabase();
+  try {
+    const allRedemptions = await db.getAll('rewardRedemptions');
+    
+    // Filter redemptions by date
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - daysAgo);
+    
+    return allRedemptions.filter(redemption => 
+      new Date(redemption.redeemedAt) >= startDate
+    );
+  } catch (error) {
+    console.error('Failed to get reward redemptions:', error);
+    return [];
+  }
+}
+
+/**
+ * Get user's points and streak information
+ */
+export async function getUserStats() {
+  const db = await getDatabase();
+  try {
+    const userData = await db.get('user', 'default');
+    return userData || { points: 0, streakDays: 0 };
+  } catch (error) {
+    console.error('Failed to get user stats:', error);
+    return { points: 0, streakDays: 0 };
+  }
+}
+
+/**
+ * Complete a habit and update user points
+ */
+export async function completeHabit(habitId: string) {
+  const db = await getDatabase();
+  try {
+    const habit = await db.get('habits', habitId);
+    if (!habit) return { success: false, message: 'Habit not found' };
+    
+    // Create completion record
+    const completionId = `completion_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    await db.add('completions', {
+      id: completionId,
+      habitId,
+      completedAt: new Date(),
+      points: habit.points
+    });
+    
+    // Update user points
+    const userData = await db.get('user', 'default');
+    if (userData) {
+      await db.put('user', {
+        ...userData,
+        points: userData.points + habit.points,
+        lastActive: new Date()
+      });
+    }
+    
+    return { 
+      success: true, 
+      message: `Habit completed. Earned ${habit.points} points!`,
+      newPoints: (userData?.points || 0) + habit.points
+    };
+  } catch (error) {
+    console.error('Failed to complete habit:', error);
+    return { success: false, message: 'Failed to complete habit' };
+  }
+}
+
+/**
+ * Get all user data combined for agent context
+ */
+export async function getUserDataForAgent() {
+  try {
+    const db = await getDatabase();
+    
+    // Fetch user profile data
+    const user = await db.get('userProfile', 'default');
+    if (!user) {
+      return { error: "User profile not found" };
+    }
+
+    // Fetch user's habits
+    const habits = await db.getAll('habits');
+    
+    // Fetch habit completions (last 30 days)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const allCompletions = await db.getAll('completions');
+    const completions = allCompletions.filter(completion => 
+      new Date(completion.completedAt) >= thirtyDaysAgo
+    );
+    
+    // Fetch rewards
+    const rewards = await db.getAll('rewards');
+    
+    // Fetch redemptions
+    const allRedemptions = await db.getAll('rewardRedemptions');
+    const redemptions = allRedemptions.filter(redemption => 
+      new Date(redemption.redeemedAt) >= thirtyDaysAgo
+    );
+    
+    // Get user data for points
+    const userData = await db.get('user', 'default');
+    
+    // Calculate streak
+    const streak = calculateStreak(completions);
+    
+    // Format recent activities
+    const recentActivity = formatRecentActivity(habits, completions, rewards, redemptions);
+    
+    return {
+      profile: user,
+      habits,
+      completions,
+      rewards,
+      points: userData?.points || 0,
+      streak,
+      recentActivity
+    };
+  } catch (error) {
+    console.error("Error getting user data from database:", error);
+    return { error: "Failed to retrieve user data from database" };
+  }
+}
+
+/**
+ * Format recent activity for agent context (last 5 activities)
+ */
+function formatRecentActivity(
+  habits: WeiDB['habits']['value'][], 
+  completions: WeiDB['completions']['value'][], 
+  rewards: WeiDB['rewards']['value'][], 
+  redemptions: WeiDB['rewardRedemptions']['value'][]
+) {
+  // Define activity types
+  type CompletionActivity = {
+    type: 'completion';
+    date: Date;
+    points: number;
+    details: {
+      habitName: string;
+      habitId: string;
+    };
+  };
+  
+  type RedemptionActivity = {
+    type: 'redemption';
+    date: Date;
+    points: number;
+    details: {
+      rewardName: string;
+      rewardId: string;
+    };
+  };
+  
+  type CombinedActivity = CompletionActivity | RedemptionActivity;
+  
+  // Combine completions and redemptions
+  const allActivities: CombinedActivity[] = [
+    ...completions.map(completion => {
+      const habit = habits.find(h => h.id === completion.habitId);
+      return {
+        type: 'completion' as const,
+        date: new Date(completion.completedAt),
+        points: completion.points,
+        details: {
+          habitName: habit?.name || 'Unknown habit',
+          habitId: completion.habitId
+        }
+      };
+    }),
+    ...redemptions.map(redemption => {
+      const reward = rewards.find(r => r.id === redemption.rewardId);
+      return {
+        type: 'redemption' as const,
+        date: new Date(redemption.redeemedAt),
+        points: -redemption.cost,
+        details: {
+          rewardName: reward?.name || 'Unknown reward',
+          rewardId: redemption.rewardId
+        }
+      };
+    })
+  ];
+  
+  // Sort by date (newest first)
+  allActivities.sort((a, b) => b.date.getTime() - a.date.getTime());
+  
+  // Take the 5 most recent activities
+  return allActivities.slice(0, 5).map(activity => {
+    const formattedDate = activity.date.toLocaleDateString();
+    
+    if (activity.type === 'completion') {
+      return {
+        action: 'Completed',
+        target: activity.details.habitName,
+        date: formattedDate,
+        points: activity.points
+      };
+    } else {
+      return {
+        action: 'Redeemed',
+        target: activity.details.rewardName,
+        date: formattedDate,
+        points: activity.points
+      };
+    }
+  });
+}
+
+/**
+ * Calculates the user's current streak based on habit completions
+ * @param completions Array of habit completions
+ * @returns Number representing current streak
+ */
+function calculateStreak(completions: WeiDB['completions']['value'][]): number {
+  if (!completions.length) return 0;
+  
+  // Sort completions by date (newest first)
+  const sortedCompletions = [...completions].sort((a, b) => 
+    new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
+  );
+  
+  // Group completions by day
+  const dailyCompletions = new Map<string, WeiDB['completions']['value'][]>();
+  sortedCompletions.forEach(completion => {
+    const date = new Date(completion.completedAt);
+    const dateString = date.toISOString().split('T')[0];
+    
+    if (!dailyCompletions.has(dateString)) {
+      dailyCompletions.set(dateString, []);
+    }
+    dailyCompletions.get(dateString)!.push(completion);
+  });
+  
+  // Check if today has completions
+  const today = new Date().toISOString().split('T')[0];
+  const hasCompletionToday = dailyCompletions.has(today);
+  
+  // Calculate streak
+  let currentStreak = hasCompletionToday ? 1 : 0;
+  const dates = Array.from(dailyCompletions.keys()).sort().reverse();
+  
+  if (dates.length <= 1) return currentStreak;
+  
+  // Start from yesterday if we have a completion today
+  const startIndex = hasCompletionToday ? 1 : 0;
+  
+  for (let i = startIndex; i < dates.length; i++) {
+    const currentDate = new Date(dates[i]);
+    const previousDate = new Date(dates[i-1]);
+    
+    // Calculate difference in days
+    const diffTime = previousDate.getTime() - currentDate.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    // If the difference is exactly 1 day, continue the streak
+    if (diffDays === 1) {
+      currentStreak++;
+    } else {
+      break;
+    }
+  }
+  
+  return currentStreak;
+}
+```
+
 
 ### OpenAI Realtime API
 
@@ -4003,9 +4490,173 @@ export async function GET() {
 
 ### Set up .env
 
+Create a new file `.env` and add the following variables:
+
 ```
 AIML_API_KEY=...
-GIPHY_API_KEY=...
+GIPHY_API_KEY=... ( optional, it's for sending gifs )
 ```
 
-## Storing data locally using IndexedDB
+## Back to UI
+
+Quckly add a bottom navigation to the `Dashboard` page.
+It gives a quick access to the home, habits, rewards, chat and profile pages.
+Mobile friendly. Easy to use.
+
+Create a new file `app/components/dashboard/BottomNavigation.tsx`.
+```tsx
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { House, ListChecks, Gift, ChatCenteredText, User } from "@phosphor-icons/react/dist/ssr";
+import { cn } from "@/lib/utils";
+
+const items = [
+  {
+    label: "Home",
+    icon: House,
+    href: "/dashboard",
+  },
+  {
+    label: "Habits",
+    icon: ListChecks,
+    href: "/habits",
+  },
+  {
+    label: "Rewards",
+    icon: Gift,
+    href: "/rewards",
+  },
+  {
+    label: "Chat",
+    icon: ChatCenteredText,
+    href: "/chat",
+  },
+  {
+    label: "Profile",
+    icon: User,
+    href: "/profile",
+  },
+];
+
+export default function BottomNavigation() {
+  const pathname = usePathname();
+  
+  return (
+    <div className="fixed bottom-0 left-0 right-0 z-10 md:hidden">
+      <div className="bg-background/80 backdrop-blur-md border-t">
+        <nav className="flex justify-around">
+          {items.map((item) => {
+            const isActive = pathname === item.href || 
+              (item.href === '/dashboard' && pathname === '/');
+            
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                className={cn(
+                  "flex flex-col items-center py-2 px-3",
+                  isActive 
+                    ? "text-primary" 
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <item.icon className="h-5 w-5" />
+                <span className="text-xs mt-1">{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+    </div>
+  );
+}
+```
+
+Add the `BottomNavigation` component to the `Dashboard` page.
+
+Then create different folders for the other pages. 
+Let's create the `chat` page.
+
+```
+app
+  chat
+    page.tsx
+```
+
+Call the `ChatInterface` component in the `chat` page.
+
+```tsx
+"use client";
+
+import { useDatabase } from "@/app/contexts/DatabaseContext";
+import DatabaseError from "@/app/components/errors/DatabaseError";
+import ChatInterface from "@/app/components/chat/ChatInterface";
+import DefaultLoading from "../components/default-loading";
+
+export default function ChatPage() {
+  const { error, isLoading } = useDatabase();
+
+  if (error) {
+    return <DatabaseError error={error} onRetry={() => window.location.reload()} />;
+  }
+
+  if (isLoading) {
+    return (
+      <DefaultLoading text="loading..." />
+    );
+  }
+
+  return (
+    <>
+      <div className="@container/main relative flex h-full w-full flex-col items-center justify-end">
+        <ChatInterface />
+      </div>
+    </>
+  );
+} 
+```
+
+Repeat the same for other pages.
+
+Final UI/UX of the app. Should look like this.
+
+<img src="./public/assets/wei-uiux.png" alt="Wei Features">
+
+
+## Run the app
+
+to run the app, use the following command:
+
+```
+npm run dev
+```
+
+Go to the `http://localhost:3000` and you should see the app running.
+
+Then push the changes to the `main` branch.
+
+```
+git add .
+git commit -m "wei ai voice agent"
+git push
+```
+
+Go to vercel.com and connect your github repository. Import the project and deploy.
+
+When done, you should get a link to the app that ends with `.vercel.app`.
+Here's mine `https://trywei.vercel.app/`.
+
+## Next steps
+
+- buy domain name and point it to the vercel app ( example mine: https://wei.yaps.gg )
+- add realtime video streaming
+- add remote database, for example supabase
+- add auth with Google OAuth 2.0
+- and other interesting features....
+
+Should you have any questions, feel free to ask me.
+- on linkedin: https://www.linkedin.com/in/abdibrokhim
+- on x: https://x.com/abdibrokhim
+- on yaps: https://www.yaps.gg/

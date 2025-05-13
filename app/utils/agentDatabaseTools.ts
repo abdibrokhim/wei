@@ -1,6 +1,5 @@
 import { IDBPDatabase } from 'idb';
 import { WeiDB } from '../types/database';
-import { Activity } from '../types';
 import { initDB } from '@/lib/db';
 
 /**
@@ -376,4 +375,4 @@ function calculateStreak(completions: WeiDB['completions']['value'][]): number {
   }
   
   return currentStreak;
-} 
+}

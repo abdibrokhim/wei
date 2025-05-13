@@ -21,10 +21,9 @@ import { ArrowLeft, ListMagnifyingGlass, PencilSimpleLine } from "@phosphor-icon
 import { useRouter } from "next/navigation";
 import { TextShimmer } from "@/components/motion-primitives/text-shimmer";
 interface ChatInterfaceProps {
-  fullHeight?: boolean;
 }
 
-export default function ChatInterface({ fullHeight }: ChatInterfaceProps) {
+export default function ChatInterface({ }: ChatInterfaceProps) {
   const { messages, isTyping, sendMessage, clearMessages, loadConversation, currentConversationId } = useChat();
   const [inputValue, setInputValue] = useState("");
   const [isSending, setIsSending] = useState(false);
@@ -33,12 +32,6 @@ export default function ChatInterface({ fullHeight }: ChatInterfaceProps) {
   const pathname = usePathname();
   const router = useRouter();
   
-  // Determine if we're on the standalone chat page
-  const isStandalonePage = pathname === "/chat";
-  
-  // Use fullHeight prop if provided, otherwise determine based on pathname
-  const useFullHeight = fullHeight !== undefined ? fullHeight : isStandalonePage;
-
   // Scroll to bottom when messages change
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -76,7 +69,7 @@ export default function ChatInterface({ fullHeight }: ChatInterfaceProps) {
   };
 
   return (
-    <Card className={`flex gap-4 bg-transparent border-none shadow-none flex-col p-2 ${useFullHeight ? 'h-[100dvh]' : 'h-[100dvh]'}`}>
+    <Card className={`flex gap-4 bg-transparent border-none shadow-none flex-col p-2 h-[100dvh]`}>
       <CardHeader className="pb-0 pt-0 px-0 border-b border-border [.border-b]:pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
